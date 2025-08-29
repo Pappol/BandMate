@@ -16,7 +16,9 @@ login_manager = LoginManager()
 
 def create_app(config_name=None):
     """Application factory pattern for Flask app"""
-    app = Flask(__name__)
+    app = Flask(__name__, 
+                template_folder='main/templates',
+                static_folder='main/static')
     
     # Configuration
     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key')
@@ -33,17 +35,25 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     
     # Configure login manager
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = 'main.login'
     login_manager.login_message = 'Please log in to access this page.'
     
-    # Google OAuth blueprint
-    google_bp = make_google_blueprint(
-        client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
-        client_secret=app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
-        scope=['openid', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
-        redirect_to='main.dashboard'
-    )
-    app.register_blueprint(google_bp, url_prefix='/login')
+    # Google OAuth blueprint - only register if credentials are provided
+    if (app.config['GOOGLE_OAUTH_CLIENT_ID'] and 
+        app.config['GOOGLE_OAUTH_CLIENT_ID'] != 'your-google-client-id.apps.googleusercontent.com' and
+        app.config['GOOGLE_OAUTH_CLIENT_SECRET'] and 
+        app.config['GOOGLE_OAUTH_CLIENT_SECRET'] != 'your-google-client-secret'):
+        
+        google_bp = make_google_blueprint(
+            client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
+            client_secret=app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
+            scope=['openid', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
+            redirect_to='main.dashboard'
+        )
+        app.register_blueprint(google_bp, url_prefix='/login')
+        print("✅ Google OAuth blueprint registered")
+    else:
+        print("⚠️  Google OAuth credentials not configured - OAuth login will not work")
     
     # Register blueprints
     from app.main import main as main_blueprint

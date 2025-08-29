@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app
 from flask_login import current_user, login_user, logout_user
 from flask_dance.contrib.google import google
 from app.main import main
@@ -13,14 +13,27 @@ def index():
     """Home page - redirect to dashboard if logged in, otherwise show login"""
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
-    return render_template('login.html')
+    return render_template('login.html', config=current_app.config)
 
 @main.route('/login')
 def login():
     """Login page with Google OAuth button"""
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
-    return render_template('login.html')
+    return render_template('login.html', config=current_app.config)
+
+@main.route('/demo-login/<email>')
+def demo_login(email):
+    """Demo login route for testing without Google OAuth"""
+    # Find the demo user by email
+    user = User.query.filter_by(email=email).first()
+    if user:
+        login_user(user)
+        flash(f'Demo login successful! Welcome back, {user.name}!', 'success')
+        return redirect(url_for('main.dashboard'))
+    else:
+        flash('Demo user not found. Available demo users: alice@demo.com, bob@demo.com, carla@demo.com', 'error')
+        return redirect(url_for('main.login'))
 
 @main.route('/login/google')
 def google_login():
