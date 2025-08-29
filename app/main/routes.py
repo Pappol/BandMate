@@ -299,7 +299,7 @@ def propose_song():
         link = request.form.get('link', '')
         spotify_track_id = request.form.get('spotify_track_id', '')
         album_art_url = request.form.get('album_art_url', '')
-        duration_minutes = request.form.get('duration_minutes', '')
+        duration_seconds = request.form.get('duration_seconds', '')
         
         if not title or not artist:
             flash('Title and artist are required.', 'error')
@@ -313,7 +313,7 @@ def propose_song():
             band_id=current_user.band_id,
             spotify_track_id=spotify_track_id if spotify_track_id else None,
             album_art_url=album_art_url if album_art_url else None,
-            duration_minutes=float(duration_minutes) if duration_minutes and duration_minutes.replace('.', '').isdigit() else None
+            duration_seconds=int(duration_seconds) if duration_seconds and duration_seconds.isdigit() else None
         )
         db.session.add(song)
         db.session.commit()
@@ -409,30 +409,30 @@ def generate_setlist():
         learning_time = 0
         
         for song in learning_pool:
-            if song.duration_minutes and learning_time + song.duration_minutes <= time_learning:
+            if song.duration_seconds and learning_time + (song.duration_seconds / 60) <= time_learning:
                 learning_setlist.append({
                     'title': song.title,
                     'artist': song.artist,
-                    'duration_minutes': song.duration_minutes,
+                    'duration_minutes': round(song.duration_seconds / 60, 1),
                     'block': 'learning',
                     'readiness_score': round(song.readiness_score, 2)
                 })
-                learning_time += song.duration_minutes
+                learning_time += song.duration_seconds / 60
         
         # Build maintenance setlist
         maintenance_setlist = []
         maintenance_time = 0
         
         for song in maintenance_pool:
-            if song.duration_minutes and maintenance_time + song.duration_minutes <= time_maintenance:
+            if song.duration_seconds and maintenance_time + (song.duration_seconds / 60) <= time_maintenance:
                 maintenance_setlist.append({
                     'title': song.title,
                     'artist': song.artist,
-                    'duration_minutes': song.duration_minutes,
+                    'duration_minutes': round(song.duration_seconds / 60, 1),
                     'block': 'maintenance',
                     'last_rehearsed': song.last_rehearsed_on.isoformat() if song.last_rehearsed_on else 'Never'
                 })
-                maintenance_time += song.duration_minutes
+                maintenance_time += song.duration_seconds / 60
         
         # Combine setlists
         full_setlist = learning_setlist + maintenance_setlist

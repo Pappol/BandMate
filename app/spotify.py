@@ -127,7 +127,7 @@ class SpotifyAPI:
                         'artist': track['artists'][0]['name'] if track['artists'] else 'Unknown Artist',
                         'album': track['album']['name'],
                         'duration_ms': track['duration_ms'],
-                        'duration_minutes': round(track['duration_ms'] / 60000, 1),
+                        'duration_seconds': int(track['duration_ms'] / 1000),
                         'album_art_url': album_art,
                         'spotify_url': track['external_urls']['spotify'],
                         'preview_url': track.get('preview_url')
@@ -194,7 +194,7 @@ class SpotifyAPI:
                 'artist': track['artists'][0]['name'] if track['artists'] else 'Unknown Artist',
                 'album': track['album']['name'],
                 'duration_ms': track['duration_ms'],
-                'duration_minutes': round(track['duration_ms'] / 60000, 1),
+                'duration_seconds': int(track['duration_ms'] / 1000),
                 'album_art_url': album_art,
                 'spotify_url': track['external_urls']['spotify'],
                 'preview_url': track.get('preview_url')

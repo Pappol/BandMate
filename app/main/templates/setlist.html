@@ -134,7 +134,7 @@
                         
                         <div class="flex items-center space-x-4">
                             <div class="text-right">
-                                <div class="text-sm font-medium text-gray-900" x-text="`${song.duration_minutes} min`"></div>
+                                <div class="text-sm font-medium text-gray-900" x-text="`${Math.floor(song.duration_minutes)}:${String(Math.round((song.duration_minutes % 1) * 60)).padStart(2, '0')}`"></div>
                                 <div class="text-xs text-gray-500" x-text="`Total: ${song.cumulative_time} min`"></div>
                             </div>
                             

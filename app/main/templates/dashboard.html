@@ -81,8 +81,14 @@
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-500">Total Duration</p>
                     <p class="text-2xl font-semibold text-gray-900">
-                        {% set total_duration = songs|sum(attribute='duration_minutes') or 0 %}
-                        {{ total_duration }} min
+                        {% set total_duration_seconds = songs|sum(attribute='duration_seconds') or 0 %}
+                        {% if total_duration_seconds > 0 %}
+                            {% set total_minutes = total_duration_seconds // 60 %}
+                            {% set total_seconds = total_duration_seconds % 60 %}
+                            {{ total_minutes }}:{{ "%02d"|format(total_seconds) }}
+                        {% else %}
+                            0:00
+                        {% endif %}
                     </p>
                 </div>
             </div>
@@ -153,8 +159,10 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {% if song.duration_minutes %}
-                                {{ song.duration_minutes }} min
+                            {% if song.duration_seconds %}
+                                {% set minutes = song.duration_seconds // 60 %}
+                                {% set seconds = song.duration_seconds % 60 %}
+                                {{ minutes }}:{{ "%02d"|format(seconds) }}
                             {% else %}
                                 <span class="text-gray-400">-</span>
                             {% endif %}

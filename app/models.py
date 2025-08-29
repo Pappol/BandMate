@@ -103,7 +103,7 @@ class Song(db.Model):
     title = db.Column(db.String(200), nullable=False)
     artist = db.Column(db.String(200), nullable=False)
     status = db.Column(db.Enum(SongStatus), default=SongStatus.WISHLIST)
-    duration_minutes = db.Column(db.Float, nullable=True)
+    duration_seconds = db.Column(db.Integer, nullable=True)
     last_rehearsed_on = db.Column(db.Date, nullable=True)
     band_id = db.Column(db.Integer, db.ForeignKey('bands.id'), nullable=False)
     spotify_track_id = db.Column(db.String(50), nullable=True, index=True)

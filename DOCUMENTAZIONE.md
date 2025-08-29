@@ -63,7 +63,7 @@ Song (Canzone)
 ├── id, title, artist
 ├── band_id (FK a Band)
 ├── status (wishlist/active/archived)
-├── duration_minutes
+├── duration_seconds
 ├── spotify_track_id (ID univoco Spotify)
 └── album_art_url (URL copertina album)
 
@@ -91,18 +91,32 @@ Vote (Voto)
 - [x] **Ricerca Canzoni Spotify** ✅
   - Ricerca automatica tramite API Spotify
   - Autocompletamento campi titolo, artista, durata
-  - Salvataggio automatico metadati (album art, track ID)
+  - Salvataggio automatico metadati (album art, track ID, Spotify URL)
   - Interfaccia utente intuitiva con risultati visivi
 
 - [x] **Modello Dati Esteso** ✅
   - Campo `spotify_track_id` per identificazione univoca
   - Campo `album_art_url` per copertine album
-  - Durata automatica in minuti da API Spotify
+  - Durata automatica in secondi da API Spotify (formato MM:SS)
+  - Campo `spotify_url` per link diretti alle canzoni
 
 - [x] **UI Migliorata** ✅
   - Album art visualizzata in wishlist e dashboard
   - Form di proposta canzone con ricerca Spotify integrata
   - Fallback grafico per canzoni senza copertina
+  - Durate visualizzate in formato MM:SS (es. 3:45, 6:30)
+
+- [x] **Gestione Errori Robusta** ✅
+  - Timeout handling per richieste API
+  - Gestione errori di autenticazione
+  - Fallback graceful quando Spotify non è disponibile
+  - Logging dettagliato per debugging
+
+- [x] **Test Unitari** ✅
+  - Test per inizializzazione API
+  - Test per gestione token
+  - Test per calcolo durate
+  - Test per gestione errori
 
 ### Configurazione Richiesta
 ```bash

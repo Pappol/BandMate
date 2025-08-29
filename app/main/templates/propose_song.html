@@ -80,17 +80,17 @@
             <input type="hidden" name="spotify_url" id="spotify_url">
             
             <div>
-                <label for="duration_minutes" class="block text-sm font-medium text-gray-700">
-                    Duration (minutes)
+                <label for="duration_seconds" class="block text-sm font-medium text-gray-700">
+                    Duration (seconds)
                 </label>
                 <input type="number" 
-                       name="duration_minutes" 
-                       id="duration_minutes" 
+                       name="duration_seconds" 
+                       id="duration_seconds" 
                        min="1" 
-                       max="30"
+                       max="3600"
                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                       placeholder="e.g., 6">
-                <p class="mt-1 text-sm text-gray-500">Optional: How long is the song? (Auto-filled from Spotify)</p>
+                       placeholder="e.g., 390">
+                <p class="mt-1 text-sm text-gray-500">Optional: How long is the song? (Auto-filled from Spotify, in seconds)</p>
             </div>
 
             <div>
@@ -155,11 +155,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form fields
     const titleField = document.getElementById('title');
     const artistField = document.getElementById('artist');
-    const durationField = document.getElementById('duration_minutes');
+    const durationField = document.getElementById('duration_seconds');
     const spotifyTrackIdField = document.getElementById('spotify_track_id');
     const albumArtUrlField = document.getElementById('album_art_url');
     
     let searchTimeout;
+    
+    // Helper function to format duration in MM:SS format
+    function formatDuration(seconds) {
+        if (!seconds) return '0:00';
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
     
     // Search on input (with debouncing)
     searchInput.addEventListener('input', function() {
@@ -236,11 +244,11 @@ document.addEventListener('DOMContentLoaded', function() {
                          alt="Album Art" 
                          class="w-12 h-12 rounded object-cover"
                          onerror="this.src='/static/favicon.ico'">
-                    <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium text-gray-900 truncate">${track.title}</div>
-                        <div class="text-sm text-gray-500 truncate">${track.artist}</div>
-                        <div class="text-xs text-gray-400">${track.album} • ${track.duration_minutes} min</div>
-                    </div>
+                            <div class="flex-1 min-w-0">
+            <div class="text-sm font-medium text-gray-900 truncate">${track.title}</div>
+            <div class="text-sm text-gray-500 truncate">${track.artist}</div>
+            <div class="text-xs text-gray-400">${track.album} • ${formatDuration(track.duration_seconds)}</div>
+        </div>
                 </div>
             `;
             
@@ -255,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Fill in the form fields
         titleField.value = track.title;
         artistField.value = track.artist;
-        durationField.value = track.duration_minutes;
+        durationField.value = track.duration_seconds;
         spotifyTrackIdField.value = track.id;
         albumArtUrlField.value = track.album_art_url || '';
         

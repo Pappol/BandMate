@@ -64,8 +64,10 @@
                                 <p class="text-sm text-gray-500">by {{ song.artist }}</p>
                                 <div class="mt-1 flex items-center space-x-4 text-xs text-gray-400">
                                     <span>Proposed {{ song.created_at.strftime('%b %d, %Y') }}</span>
-                                    {% if song.duration_minutes %}
-                                    <span>• {{ song.duration_minutes }} min</span>
+                                    {% if song.duration_seconds %}
+                                        {% set minutes = song.duration_seconds // 60 %}
+                                        {% set seconds = song.duration_seconds % 60 %}
+                                        <span>• {{ minutes }}:{{ "%02d"|format(seconds) }}</span>
                                     {% endif %}
                                 </div>
                             </div>
