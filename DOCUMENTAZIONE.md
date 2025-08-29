@@ -45,6 +45,7 @@
 - **Autenticazione**: Flask-Login + Flask-Dance (Google OAuth)
 - **Frontend**: HTML + CSS + JavaScript vanilla
 - **Database ORM**: SQLAlchemy
+- **API Integrazione**: Spotify Web API (ricerca canzoni e metadati)
 
 ### Struttura Database
 ```
@@ -62,7 +63,9 @@ Song (Canzone)
 ├── id, title, artist
 ├── band_id (FK a Band)
 ├── status (wishlist/active/archived)
-└── duration_minutes
+├── duration_minutes
+├── spotify_track_id (ID univoco Spotify)
+└── album_art_url (URL copertina album)
 
 SongProgress (Progresso Canzone)
 ├── user_id (FK a User)
@@ -81,6 +84,38 @@ Vote (Voto)
 - **Blueprint Pattern**: Per organizzare le route
 - **Decorator Pattern**: Per i controlli di autorizzazione
 - **Repository Pattern**: Per l'accesso ai dati
+
+## 🎵 INTEGRAZIONE SPOTIFY API
+
+### Funzionalità Implementate
+- [x] **Ricerca Canzoni Spotify** ✅
+  - Ricerca automatica tramite API Spotify
+  - Autocompletamento campi titolo, artista, durata
+  - Salvataggio automatico metadati (album art, track ID)
+  - Interfaccia utente intuitiva con risultati visivi
+
+- [x] **Modello Dati Esteso** ✅
+  - Campo `spotify_track_id` per identificazione univoca
+  - Campo `album_art_url` per copertine album
+  - Durata automatica in minuti da API Spotify
+
+- [x] **UI Migliorata** ✅
+  - Album art visualizzata in wishlist e dashboard
+  - Form di proposta canzone con ricerca Spotify integrata
+  - Fallback grafico per canzoni senza copertina
+
+### Configurazione Richiesta
+```bash
+# Aggiungere al file .env
+SPOTIFY_CLIENT_ID=your-spotify-client-id
+SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
+```
+
+### Vantaggi dell'Integrazione
+1. **Wishlist Semplificata**: Ricerca automatica invece di inserimento manuale
+2. **Setlist Generator**: Durata automatica per ottimizzazione prove
+3. **Dashboard Professionale**: Album art per interfaccia più accattivante
+4. **Dati Precisi**: Informazioni ufficiali Spotify (titolo, artista, album)
 
 ## 🚧 TASK OPERATIVI DA COMPLETARE
 
@@ -227,6 +262,7 @@ FLASK_ENV=development
 - [x] Risolvere errori database
 - [x] Correggere configurazione OAuth
 - [x] Creare sistema di test completo
+- [x] **Integrazione Spotify API** ✅
 - [ ] Test completi autenticazione
 - [ ] Documentazione API
 

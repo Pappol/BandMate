@@ -41,11 +41,23 @@
                     <div class="flex-1">
                         <div class="flex items-center space-x-3">
                             <div class="flex-shrink-0">
-                                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                                    </svg>
-                                </div>
+                                {% if song.album_art_url %}
+                                    <img src="{{ song.album_art_url }}" 
+                                         alt="Album Art" 
+                                         class="w-12 h-12 rounded object-cover border border-gray-200"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center" style="display: none;">
+                                        <svg class="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                        </svg>
+                                    </div>
+                                {% else %}
+                                    <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                        </svg>
+                                    </div>
+                                {% endif %}
                             </div>
                             <div class="flex-1 min-w-0">
                                 <h4 class="text-lg font-medium text-gray-900">{{ song.title }}</h4>

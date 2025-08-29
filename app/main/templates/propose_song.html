@@ -20,7 +20,36 @@
 
     <!-- Form -->
     <div class="bg-white shadow rounded-lg p-6">
-        <form method="POST" class="space-y-6">
+        <!-- Spotify Search Section -->
+        <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center mb-3">
+                <svg class="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="text-sm font-medium text-green-800">Quick Search with Spotify</h3>
+            </div>
+            <p class="text-sm text-green-700 mb-3">Search for songs to automatically fill in details like duration and album art.</p>
+            
+            <div class="flex space-x-2">
+                <input type="text" 
+                       id="spotify-search" 
+                       placeholder="Search for a song (e.g., 'Everlong Foo Fighters')"
+                       class="flex-1 px-3 py-2 border border-green-300 rounded-md shadow-sm placeholder-green-400 focus:outline-none focus:ring-green-500 focus:border-green-500">
+                <button type="button" 
+                        id="search-btn"
+                        class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Search
+                </button>
+            </div>
+            
+            <!-- Search Results -->
+            <div id="search-results" class="mt-3 hidden">
+                <div class="text-sm text-green-700 mb-2">Select a song:</div>
+                <div id="results-list" class="space-y-2 max-h-48 overflow-y-auto"></div>
+            </div>
+        </div>
+
+        <form method="POST" class="space-y-6" id="song-form">
             <div>
                 <label for="title" class="block text-sm font-medium text-gray-700">
                     Song Title *
@@ -45,18 +74,23 @@
                        placeholder="e.g., Queen">
             </div>
 
+            <!-- Hidden fields for Spotify data -->
+            <input type="hidden" name="spotify_track_id" id="spotify_track_id">
+            <input type="hidden" name="album_art_url" id="album_art_url">
+            <input type="hidden" name="spotify_url" id="spotify_url">
+            
             <div>
-                <label for="duration" class="block text-sm font-medium text-gray-700">
+                <label for="duration_minutes" class="block text-sm font-medium text-gray-700">
                     Duration (minutes)
                 </label>
                 <input type="number" 
-                       name="duration" 
-                       id="duration" 
+                       name="duration_minutes" 
+                       id="duration_minutes" 
                        min="1" 
                        max="30"
                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                        placeholder="e.g., 6">
-                <p class="mt-1 text-sm text-gray-500">Optional: How long is the song?</p>
+                <p class="mt-1 text-sm text-gray-500">Optional: How long is the song? (Auto-filled from Spotify)</p>
             </div>
 
             <div>
@@ -109,4 +143,159 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('spotify-search');
+    const searchBtn = document.getElementById('search-btn');
+    const searchResults = document.getElementById('search-results');
+    const resultsList = document.getElementById('results-list');
+    const songForm = document.getElementById('song-form');
+    
+    // Form fields
+    const titleField = document.getElementById('title');
+    const artistField = document.getElementById('artist');
+    const durationField = document.getElementById('duration_minutes');
+    const spotifyTrackIdField = document.getElementById('spotify_track_id');
+    const albumArtUrlField = document.getElementById('album_art_url');
+    
+    let searchTimeout;
+    
+    // Search on input (with debouncing)
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            hideResults();
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            performSearch(query);
+        }, 300);
+    });
+    
+    // Search button click
+    searchBtn.addEventListener('click', function() {
+        const query = searchInput.value.trim();
+        if (query.length >= 2) {
+            performSearch(query);
+        }
+    });
+    
+    // Enter key in search input
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                performSearch(query);
+            }
+        }
+    });
+    
+    function performSearch(query) {
+        // Show loading state
+        searchBtn.disabled = true;
+        searchBtn.textContent = 'Searching...';
+        
+        fetch(`/api/spotify/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showResults(data.tracks);
+                }
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                showError('Failed to search. Please try again.');
+            })
+            .finally(() => {
+                searchBtn.disabled = false;
+                searchBtn.textContent = 'Search';
+            });
+    }
+    
+    function showResults(tracks) {
+        if (!tracks || tracks.length === 0) {
+            showError('No songs found. Try a different search term.');
+            return;
+        }
+        
+        resultsList.innerHTML = '';
+        
+        tracks.forEach(track => {
+            const trackElement = document.createElement('div');
+            trackElement.className = 'p-3 bg-white border border-green-200 rounded-md cursor-pointer hover:bg-green-50 transition-colors';
+            trackElement.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <img src="${track.album_art_url || '/static/favicon.ico'}" 
+                         alt="Album Art" 
+                         class="w-12 h-12 rounded object-cover"
+                         onerror="this.src='/static/favicon.ico'">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">${track.title}</div>
+                        <div class="text-sm text-gray-500 truncate">${track.artist}</div>
+                        <div class="text-xs text-gray-400">${track.album} • ${track.duration_minutes} min</div>
+                    </div>
+                </div>
+            `;
+            
+            trackElement.addEventListener('click', () => selectTrack(track));
+            resultsList.appendChild(trackElement);
+        });
+        
+        searchResults.classList.remove('hidden');
+    }
+    
+    function selectTrack(track) {
+        // Fill in the form fields
+        titleField.value = track.title;
+        artistField.value = track.artist;
+        durationField.value = track.duration_minutes;
+        spotifyTrackIdField.value = track.id;
+        albumArtUrlField.value = track.album_art_url || '';
+        
+        // Set Spotify URL in the link field
+        const linkField = document.getElementById('link');
+        if (linkField && track.spotify_url) {
+            linkField.value = track.spotify_url;
+        }
+        
+        // Hide results
+        hideResults();
+        
+        // Clear search input
+        searchInput.value = '';
+        
+        // Show success message
+        showSuccess(`Selected: ${track.title} by ${track.artist}`);
+    }
+    
+    function hideResults() {
+        searchResults.classList.add('hidden');
+        resultsList.innerHTML = '';
+    }
+    
+    function showError(message) {
+        // You can implement a proper toast/notification system here
+        alert('Error: ' + message);
+    }
+    
+    function showSuccess(message) {
+        // You can implement a proper toast/notification system here
+        console.log('Success: ' + message);
+    }
+    
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchResults.contains(e.target) && e.target !== searchInput && e.target !== searchBtn) {
+            hideResults();
+        }
+    });
+});
+</script>
 {% endblock %}

@@ -5,6 +5,7 @@ from app.main import main
 from app.auth import login_required, band_leader_required, handle_google_login, logout
 from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus, Invitation, InvitationStatus
 from app import db
+from app.spotify import spotify_api
 from datetime import datetime, date, timedelta
 import json
 
@@ -296,6 +297,9 @@ def propose_song():
         title = request.form.get('title')
         artist = request.form.get('artist')
         link = request.form.get('link', '')
+        spotify_track_id = request.form.get('spotify_track_id', '')
+        album_art_url = request.form.get('album_art_url', '')
+        duration_minutes = request.form.get('duration_minutes', '')
         
         if not title or not artist:
             flash('Title and artist are required.', 'error')
@@ -306,7 +310,10 @@ def propose_song():
             title=title,
             artist=artist,
             status=SongStatus.WISHLIST,
-            band_id=current_user.band_id
+            band_id=current_user.band_id,
+            spotify_track_id=spotify_track_id if spotify_track_id else None,
+            album_art_url=album_art_url if album_art_url else None,
+            duration_minutes=float(duration_minutes) if duration_minutes and duration_minutes.replace('.', '').isdigit() else None
         )
         db.session.add(song)
         db.session.commit()
@@ -315,6 +322,29 @@ def propose_song():
         return redirect(url_for('main.wishlist'))
     
     return render_template('propose_song.html')
+
+@main.route('/api/spotify/search')
+@login_required
+def spotify_search():
+    """Search for songs using Spotify API"""
+    query = request.args.get('q', '').strip()
+    
+    if not query:
+        return jsonify({'error': 'Search query is required'}), 400
+    
+    if len(query) < 2:
+        return jsonify({'error': 'Search query must be at least 2 characters'}), 400
+    
+    try:
+        result = spotify_api.search_tracks(query, limit=10)
+        
+        if result.get('error'):
+            return jsonify({'error': result['error']}), 400
+        
+        return jsonify({'tracks': result['tracks']})
+    except Exception as e:
+        current_app.logger.error(f"Spotify search error: {e}")
+        return jsonify({'error': 'Failed to search Spotify'}), 500
 
 @main.route('/setlist')
 @login_required
