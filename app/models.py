@@ -91,9 +91,20 @@ class Band(db.Model):
     members = db.relationship('User', back_populates='band', cascade='all, delete-orphan')
     songs = db.relationship('Song', back_populates='band', cascade='all, delete-orphan')
     invitations = db.relationship('Invitation', back_populates='band', cascade='all, delete-orphan')
+    setlist_config = db.relationship('SetlistConfig', back_populates='band', uselist=False, cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Band {self.name}>'
+    
+    def get_setlist_config(self):
+        """Get or create default setlist configuration for the band"""
+        if not self.setlist_config:
+            # Create default configuration
+            config = SetlistConfig(band_id=self.id)
+            db.session.add(config)
+            db.session.flush()  # Use flush instead of commit to avoid transaction issues
+            return config
+        return self.setlist_config
 
 class Song(db.Model):
     """Song model"""
@@ -175,3 +186,66 @@ class Vote(db.Model):
     
     def __repr__(self):
         return f'<Vote {self.user.name} -> {self.song.title}>'
+
+class SetlistConfig(db.Model):
+    """Band-specific setlist generation configuration"""
+    __tablename__ = 'setlist_configs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    band_id = db.Column(db.Integer, db.ForeignKey('bands.id'), nullable=False, unique=True)
+    
+    # Buffer percentages for time calculation
+    new_songs_buffer_percent = db.Column(db.Float, default=20.0, nullable=False)  # 20% for new songs
+    learned_songs_buffer_percent = db.Column(db.Float, default=10.0, nullable=False)  # 10% for mastered songs
+    
+    # Break time configuration
+    break_time_minutes = db.Column(db.Integer, default=10, nullable=False)
+    break_threshold_minutes = db.Column(db.Integer, default=90, nullable=False)  # Add break if session > 90 min
+    
+    # Time clustering settings
+    min_session_minutes = db.Column(db.Integer, default=30, nullable=False)
+    max_session_minutes = db.Column(db.Integer, default=240, nullable=False)  # 4 hours max
+    time_cluster_minutes = db.Column(db.Integer, default=30, nullable=False)  # 30-minute intervals
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    band = db.relationship('Band', back_populates='setlist_config')
+    
+    def __repr__(self):
+        return f'<SetlistConfig for {self.band.name}>'
+    
+    def is_break_needed(self, session_duration_minutes):
+        """Check if break should be added based on session duration"""
+        return session_duration_minutes >= self.break_threshold_minutes
+    
+    def get_clustered_duration(self, target_duration_minutes):
+        """Cluster duration to nearest 30-minute interval within min/max bounds"""
+        if target_duration_minutes < self.min_session_minutes:
+            return self.min_session_minutes
+        
+        if target_duration_minutes > self.max_session_minutes:
+            return self.max_session_minutes
+        
+        # Round to nearest 30-minute interval
+        rounded = round(target_duration_minutes / self.time_cluster_minutes) * self.time_cluster_minutes
+        
+        # Ensure the rounded value is within bounds
+        if rounded < self.min_session_minutes:
+            rounded = self.min_session_minutes
+        elif rounded > self.max_session_minutes:
+            rounded = self.max_session_minutes
+            
+        return rounded
+    
+    def calculate_song_duration_with_buffer(self, song_duration_seconds, is_learned):
+        """Calculate song duration with appropriate buffer percentage"""
+        duration_minutes = song_duration_seconds / 60
+        
+        if is_learned:
+            buffer_multiplier = 1 + (self.learned_songs_buffer_percent / 100)
+        else:
+            buffer_multiplier = 1 + (self.new_songs_buffer_percent / 100)
+        
+        return duration_minutes * buffer_multiplier

@@ -36,6 +36,9 @@
 - [x] Algoritmo di ottimizzazione setlist
 - [x] Bilanciamento tempo apprendimento vs manutenzione
 - [x] Considerazione readiness score
+- [x] **Buffer percentuali per canzoni nuove vs imparate** ✅
+- [x] **Configurazione tempo pausa personalizzabile** ✅
+- [x] **Clustering tempo in intervalli di 30 minuti** ✅
 
 ## 🏗️ ARCHITETTURA E DESIGN
 
@@ -93,6 +96,31 @@ Vote (Voto)
   - Autocompletamento campi titolo, artista, durata
   - Salvataggio automatico metadati (album art, track ID, Spotify URL)
   - Interfaccia utente intuitiva con risultati visivi
+
+## 🎼 SISTEMA SETLIST AVANZATO
+
+### Nuove Funzionalità Implementate
+- [x] **Buffer Percentuali Intelligenti** ✅
+  - **Canzoni Nuove**: Buffer del 20% per tempo di apprendimento extra
+  - **Canzoni Imparate**: Buffer del 10% per transizioni e ripasso
+  - Calcolo automatico del tempo reale di setlist con buffer inclusi
+
+- [x] **Gestione Pause Configurabile** ✅
+  - Pause automatiche per sessioni lunghe (configurabile)
+  - Durata pausa personalizzabile (5-30 minuti)
+  - Soglia pausa configurabile (60-180 minuti)
+
+- [x] **Clustering Tempo Intelligente** ✅
+  - Arrotondamento automatico a intervalli di 30 minuti
+  - Sessione minima: 30 minuti
+  - Sessione massima: 4 ore (240 minuti)
+  - Migliore pianificazione delle prove
+
+- [x] **Configurazione Band-Specifica** ✅
+  - Ogni band ha le proprie impostazioni
+  - Interfaccia di configurazione per band leader
+  - Salvataggio automatico delle preferenze
+  - Valori predefiniti ottimizzati
 
 - [x] **Modello Dati Esteso** ✅
   - Campo `spotify_track_id` per identificazione univoca
@@ -165,6 +193,13 @@ SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
   - Sistema di join tramite codice invito
   - Gestione inviti in sospeso (resend, cancel)
   - Rimozione membri (solo per band leader)
+
+- [x] **Sistema Setlist Avanzato** ✅
+  - Buffer percentuali per canzoni nuove vs imparate
+  - Configurazione pause personalizzabile
+  - Clustering tempo in intervalli configurabili
+  - Configurazione band-specifica per band leader
+  - Calcolo automatico tempo reale con buffer
 
 - [ ] **Sistema di Notifiche**
   - Notifiche per progresso canzoni
@@ -294,11 +329,11 @@ FLASK_ENV=development
 
 ### Ultimo Aggiornamento
 - **Data**: 29 Agosto 2025
-- **Versione**: 0.1.0-alpha
+- **Versione**: 0.2.0-alpha
 - **Sviluppatore**: AI Assistant
 
 ### Prossima Sessione
-- **Focus**: Completare sistema di test e risolvere problemi rimanenti
+- **Focus**: Testare nuove funzionalità setlist e completare sistema di test
 - **Obiettivo**: 80%+ test passing e 70%+ code coverage
 - **Tempo Stimato**: 2-3 ore
 
@@ -309,6 +344,11 @@ FLASK_ENV=development
 4. ✅ **Test Suite**: Creato sistema di test completo con 81 test
 5. ✅ **Demo Login**: Alice, Bob, Carla ora funzionano correttamente
 6. ✅ **Sistema Inviti**: Implementato sistema completo di inviti band con codici univoci
+7. ✅ **Sistema Setlist Avanzato**: Implementate nuove funzionalità richieste:
+   - Buffer percentuali per canzoni nuove (20%) vs imparate (10%)
+   - Configurazione pause personalizzabile
+   - Clustering tempo in intervalli di 30 minuti
+   - Interfaccia configurazione per band leader
 
 ### Comandi Utili
 ```bash

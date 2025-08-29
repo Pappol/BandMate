@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Setlist Configuration - BandMate{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Setlist Configuration</h1>
+                <p class="text-gray-600">Configure how your band's setlists are generated and timed</p>
+            </div>
+            <a href="{{ url_for('main.setlist_generator') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+                Back to Setlist Generator
+            </a>
+        </div>
+    </div>
+
+    <!-- Configuration Form -->
+    <div x-data="setlistConfig()" class="bg-white shadow rounded-lg p-6">
+        <form @submit.prevent="saveConfig()" class="space-y-6">
+            <!-- Buffer Percentages Section -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Buffer Percentages</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    These percentages add extra time to songs during setlist calculation to account for learning time, 
+                    transitions, and practice needs.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="new_songs_buffer" class="block text-sm font-medium text-gray-700">
+                            New Songs Buffer
+                        </label>
+                        <select id="new_songs_buffer" 
+                                x-model="config.new_songs_buffer_percent"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="0">0% - No extra time</option>
+                            <option value="5">5% - Minimal extra time</option>
+                            <option value="10">10% - Small extra time</option>
+                            <option value="15">15% - Moderate extra time</option>
+                            <option value="20">20% - Standard extra time</option>
+                            <option value="25">25% - Generous extra time</option>
+                            <option value="30">30% - Extended extra time</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Extra time added for songs still being learned
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="learned_songs_buffer" class="block text-sm font-medium text-gray-700">
+                            Learned Songs Buffer
+                        </label>
+                        <select id="learned_songs_buffer" 
+                                x-model="config.learned_songs_buffer_percent"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="0">0% - No extra time</option>
+                            <option value="5">5% - Minimal extra time</option>
+                            <option value="10">10% - Small extra time</option>
+                            <option value="15">15% - Moderate extra time</option>
+                            <option value="20">20% - Extended extra time</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Extra time added for mastered songs
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Break Configuration Section -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Break Configuration</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Configure when and how long breaks are added to your rehearsal sessions.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="break_time" class="block text-sm font-medium text-gray-700">
+                            Break Duration
+                        </label>
+                        <select id="break_time" 
+                                x-model="config.break_time_minutes"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="5">5 minutes</option>
+                            <option value="10">10 minutes</option>
+                            <option value="15">15 minutes</option>
+                            <option value="20">20 minutes</option>
+                            <option value="25">25 minutes</option>
+                            <option value="30">30 minutes</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            How long each break should be
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="break_threshold" class="block text-sm font-medium text-gray-700">
+                            Break Threshold
+                        </label>
+                        <select id="break_threshold" 
+                                x-model="config.break_threshold_minutes"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="60">60 minutes (1 hour)</option>
+                            <option value="75">75 minutes (1.25 hours)</option>
+                            <option value="90">90 minutes (1.5 hours)</option>
+                            <option value="105">105 minutes (1.75 hours)</option>
+                            <option value="120">120 minutes (2 hours)</option>
+                            <option value="150">150 minutes (2.5 hours)</option>
+                            <option value="180">180 minutes (3 hours)</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Add break if session is longer than this
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Clustering Section -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Time Clustering</h3>
+                <p class="text-sm text-gray-600 mb-4">
+                    Setlist durations are automatically clustered to these intervals for better planning.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="min_session" class="block text-sm font-medium text-gray-700">
+                            Minimum Session
+                        </label>
+                        <select id="min_session" 
+                                x-model="config.min_session_minutes"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="15">15 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Shortest possible session
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="max_session" class="block text-sm font-medium text-gray-700">
+                            Maximum Session
+                        </label>
+                        <select id="max_session" 
+                                x-model="config.max_session_minutes"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="120">120 minutes (2 hours)</option>
+                            <option value="150">150 minutes (2.5 hours)</option>
+                            <option value="180">180 minutes (3 hours)</option>
+                            <option value="210">210 minutes (3.5 hours)</option>
+                            <option value="240">240 minutes (4 hours)</option>
+                            <option value="270">270 minutes (4.5 hours)</option>
+                            <option value="300">300 minutes (5 hours)</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Longest possible session
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="time_cluster" class="block text-sm font-medium text-gray-700">
+                            Time Cluster
+                        </label>
+                        <select id="time_cluster" 
+                                x-model="config.time_cluster_minutes"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="15">15 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="60">60 minutes</option>
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Round sessions to nearest interval
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="flex justify-end">
+                <button type="submit" 
+                        :disabled="saving"
+                        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                    <svg x-show="!saving" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <svg x-show="saving" class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span x-text="saving ? 'Saving...' : 'Save Configuration'"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Help Section -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <h3 class="text-lg font-medium text-blue-900 mb-3">How It Works</h3>
+        <div class="text-sm text-blue-800 space-y-2">
+            <p><strong>Buffer Percentages:</strong> When calculating setlist time, new songs get extra time for learning, while mastered songs get minimal extra time for transitions.</p>
+            <p><strong>Break Management:</strong> Automatic breaks are added for longer sessions to keep rehearsals productive and comfortable.</p>
+            <p><strong>Time Clustering:</strong> Your requested session duration is automatically rounded to the nearest interval for better planning.</p>
+            <p><strong>Example:</strong> A 3:45 song with 20% buffer becomes 4:30 in the setlist, giving you time to practice difficult parts.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Alpine.js Component -->
+<script>
+function setlistConfig() {
+    return {
+        config: {
+            new_songs_buffer_percent: {{ config.new_songs_buffer_percent }},
+            learned_songs_buffer_percent: {{ config.learned_songs_buffer_percent }},
+            break_time_minutes: {{ config.break_time_minutes }},
+            break_threshold_minutes: {{ config.break_threshold_minutes }},
+            min_session_minutes: {{ config.min_session_minutes }},
+            max_session_minutes: {{ config.max_session_minutes }},
+            time_cluster_minutes: {{ config.time_cluster_minutes }}
+        },
+        saving: false,
+        
+        async saveConfig() {
+            this.saving = true;
+            
+            try {
+                const response = await fetch('/api/setlist/config', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(this.config)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification('Configuration saved successfully!', 'success');
+                } else {
+                    showNotification(data.error || 'Failed to save configuration', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Failed to save configuration', 'error');
+            } finally {
+                this.saving = false;
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

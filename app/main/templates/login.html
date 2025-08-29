@@ -67,15 +67,6 @@
             </div>
 
             <!-- Demo Login Section -->
-            <div class="relative">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-300" />
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-neutral-50 text-neutral-500">Try the demo</span>
-                </div>
-            </div>
-            
             <div class="grid grid-cols-1 gap-3">
                 <a href="{{ url_for('main.demo_login', email='alice@demo.com') }}" 
                    class="w-full flex justify-center py-3 px-4 border-2 border-primary rounded-md shadow-lg text-sm font-medium text-primary-dark bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 cursor-pointer relative z-10">
@@ -108,37 +99,6 @@
                 }
             }
             </script>
-        </div>
-        
-        <!-- Features Preview -->
-        <div class="mt-12 bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">What you can do with BandMate:</h3>
-            <ul class="space-y-3 text-sm text-gray-600">
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                    Track song progress for each band member
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                    Vote on new song proposals
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                    Generate optimized rehearsal setlists
-                </li>
-                <li class="flex items-start">
-                    <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                    Monitor rehearsal schedules and progress
-                </li>
-            </ul>
         </div>
     </div>
 </div>

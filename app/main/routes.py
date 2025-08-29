@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user
 from flask_dance.contrib.google import google
 from app.main import main
 from app.auth import login_required, band_leader_required, handle_google_login, logout
-from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus, Invitation, InvitationStatus
+from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus, Invitation, InvitationStatus, SetlistConfig
 from app import db
 from app.spotify import spotify_api
 from datetime import datetime, date, timedelta
@@ -365,9 +365,15 @@ def generate_setlist():
         if duration_total <= 0 or learning_ratio < 0 or learning_ratio > 1:
             return jsonify({'error': 'Invalid parameters'}), 400
         
-        # Calculate time allocation
-        time_learning = round(duration_total * learning_ratio)
-        time_maintenance = duration_total - time_learning
+        # Get band's setlist configuration
+        band_config = current_user.band.get_setlist_config()
+        
+        # Cluster duration to nearest 30-minute interval
+        clustered_duration = band_config.get_clustered_duration(duration_total)
+        
+        # Calculate time allocation with clustered duration
+        time_learning = round(clustered_duration * learning_ratio)
+        time_maintenance = clustered_duration - time_learning
         
         # Get songs for the user's band
         active_songs = Song.query.filter_by(
@@ -409,57 +415,81 @@ def generate_setlist():
         learning_time = 0
         
         for song in learning_pool:
-            if song.duration_seconds and learning_time + (song.duration_seconds / 60) <= time_learning:
-                learning_setlist.append({
-                    'title': song.title,
-                    'artist': song.artist,
-                    'duration_minutes': round(song.duration_seconds / 60, 1),
-                    'block': 'learning',
-                    'readiness_score': round(song.readiness_score, 2)
-                })
-                learning_time += song.duration_seconds / 60
+            if song.duration_seconds:
+                # Calculate duration with new songs buffer
+                song_duration_with_buffer = band_config.calculate_song_duration_with_buffer(
+                    song.duration_seconds, is_learned=False
+                )
+                
+                if learning_time + song_duration_with_buffer <= time_learning:
+                    learning_setlist.append({
+                        'title': song.title,
+                        'artist': song.artist,
+                        'duration_minutes': round(song.duration_seconds / 60, 1),
+                        'duration_with_buffer': round(song_duration_with_buffer, 1),
+                        'buffer_percent': band_config.new_songs_buffer_percent,
+                        'block': 'learning',
+                        'readiness_score': round(song.readiness_score, 2)
+                    })
+                    learning_time += song_duration_with_buffer
         
         # Build maintenance setlist
         maintenance_setlist = []
         maintenance_time = 0
         
         for song in maintenance_pool:
-            if song.duration_seconds and maintenance_time + (song.duration_seconds / 60) <= time_maintenance:
-                maintenance_setlist.append({
-                    'title': song.title,
-                    'artist': song.artist,
-                    'duration_minutes': round(song.duration_seconds / 60, 1),
-                    'block': 'maintenance',
-                    'last_rehearsed': song.last_rehearsed_on.isoformat() if song.last_rehearsed_on else 'Never'
-                })
-                maintenance_time += song.duration_seconds / 60
+            if song.duration_seconds:
+                # Calculate duration with learned songs buffer
+                song_duration_with_buffer = band_config.calculate_song_duration_with_buffer(
+                    song.duration_seconds, is_learned=True
+                )
+                
+                if maintenance_time + song_duration_with_buffer <= time_maintenance:
+                    maintenance_setlist.append({
+                        'title': song.title,
+                        'artist': song.artist,
+                        'duration_minutes': round(song.duration_seconds / 60, 1),
+                        'duration_with_buffer': round(song_duration_with_buffer, 1),
+                        'buffer_percent': band_config.learned_songs_buffer_percent,
+                        'block': 'maintenance',
+                        'last_rehearsed': song.last_rehearsed_on.isoformat() if song.last_rehearsed_on else 'Never'
+                    })
+                    maintenance_time += song_duration_with_buffer
         
         # Combine setlists
         full_setlist = learning_setlist + maintenance_setlist
         
-        # Add break if total time > 90 minutes
+        # Add break based on configuration
         break_info = None
-        if duration_total > 90:
+        if band_config.is_break_needed(clustered_duration):
             break_info = {
                 'position': 'mid-session',
-                'duration': 10,
-                'description': '10-minute break'
+                'duration': band_config.break_time_minutes,
+                'description': f'{band_config.break_time_minutes}-minute break'
             }
         
-        # Calculate cumulative times
+        # Calculate cumulative times with buffer durations
         cumulative_time = 0
         for item in full_setlist:
-            cumulative_time += item['duration_minutes']
-            item['cumulative_time'] = cumulative_time
+            cumulative_time += item['duration_with_buffer']
+            item['cumulative_time'] = round(cumulative_time, 1)
         
         result = {
             'setlist': full_setlist,
             'summary': {
-                'total_duration': duration_total,
-                'learning_time': learning_time,
-                'maintenance_time': maintenance_time,
+                'total_duration': clustered_duration,
+                'original_duration': duration_total,
+                'learning_time': round(learning_time, 1),
+                'maintenance_time': round(maintenance_time, 1),
                 'learning_ratio': learning_ratio,
-                'break_info': break_info
+                'break_info': break_info,
+                'config': {
+                    'new_songs_buffer': band_config.new_songs_buffer_percent,
+                    'learned_songs_buffer': band_config.learned_songs_buffer_percent,
+                    'break_time': band_config.break_time_minutes,
+                    'break_threshold': band_config.break_threshold_minutes,
+                    'time_cluster': band_config.time_cluster_minutes
+                }
             }
         }
         
@@ -768,3 +798,76 @@ def remove_member(member_id):
         flash('Failed to remove member. Please try again.', 'error')
     
     return redirect(url_for('main.band_management'))
+
+@main.route('/setlist/config')
+@login_required
+@band_leader_required
+def setlist_config():
+    """Setlist configuration management page for band leaders"""
+    band_config = current_user.band.get_setlist_config()
+    return render_template('setlist_config.html', config=band_config)
+
+@main.route('/api/setlist/config', methods=['GET'])
+@login_required
+@band_leader_required
+def get_setlist_config():
+    """Get current setlist configuration"""
+    band_config = current_user.band.get_setlist_config()
+    return jsonify({
+        'new_songs_buffer_percent': band_config.new_songs_buffer_percent,
+        'learned_songs_buffer_percent': band_config.learned_songs_buffer_percent,
+        'break_time_minutes': band_config.break_time_minutes,
+        'break_threshold_minutes': band_config.break_threshold_minutes,
+        'min_session_minutes': band_config.min_session_minutes,
+        'max_session_minutes': band_config.max_session_minutes,
+        'time_cluster_minutes': band_config.time_cluster_minutes
+    })
+
+@main.route('/api/setlist/config', methods=['PUT'])
+@login_required
+@band_leader_required
+def update_setlist_config():
+    """Update setlist configuration"""
+    try:
+        data = request.get_json()
+        band_config = current_user.band.get_setlist_config()
+        
+        # Update configuration fields
+        if 'new_songs_buffer_percent' in data:
+            band_config.new_songs_buffer_percent = float(data['new_songs_buffer_percent'])
+        if 'learned_songs_buffer_percent' in data:
+            band_config.learned_songs_buffer_percent = float(data['learned_songs_buffer_percent'])
+        if 'break_time_minutes' in data:
+            band_config.break_time_minutes = int(data['break_time_minutes'])
+        if 'break_threshold_minutes' in data:
+            band_config.break_threshold_minutes = int(data['break_threshold_minutes'])
+        if 'min_session_minutes' in data:
+            band_config.min_session_minutes = int(data['min_session_minutes'])
+        if 'max_session_minutes' in data:
+            band_config.max_session_minutes = int(data['max_session_minutes'])
+        if 'time_cluster_minutes' in data:
+            band_config.time_cluster_minutes = int(data['time_cluster_minutes'])
+        
+        # Validate ranges
+        if not (0 <= band_config.new_songs_buffer_percent <= 100):
+            return jsonify({'error': 'New songs buffer must be between 0 and 100'}), 400
+        if not (0 <= band_config.learned_songs_buffer_percent <= 100):
+            return jsonify({'error': 'Learned songs buffer must be between 0 and 100'}), 400
+        if not (5 <= band_config.break_time_minutes <= 30):
+            return jsonify({'error': 'Break time must be between 5 and 30 minutes'}), 400
+        if not (60 <= band_config.break_threshold_minutes <= 180):
+            return jsonify({'error': 'Break threshold must be between 60 and 180 minutes'}), 400
+        if not (15 <= band_config.min_session_minutes <= 60):
+            return jsonify({'error': 'Minimum session must be between 15 and 60 minutes'}), 400
+        if not (120 <= band_config.max_session_minutes <= 300):
+            return jsonify({'error': 'Maximum session must be between 120 and 300 minutes'}), 400
+        if not (15 <= band_config.time_cluster_minutes <= 60):
+            return jsonify({'error': 'Time cluster must be between 15 and 60 minutes'}), 400
+        
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Configuration updated successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error updating setlist config: {e}")
+        return jsonify({'error': 'Failed to update configuration'}), 500

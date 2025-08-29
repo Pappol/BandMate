@@ -78,7 +78,7 @@ def test_song(test_band):
         title="Test Song",
         artist="Test Artist",
         status=SongStatus.ACTIVE,
-        duration_minutes=5,
+        duration_seconds=300,  # 5 minutes in seconds
         band_id=test_band.id
     )
     db.session.add(song)
@@ -126,7 +126,7 @@ def create_test_data():
             title=f"Test Song {i}",
             artist=f"Test Artist {i}",
             status=SongStatus.ACTIVE if i < 3 else SongStatus.WISHLIST,
-            duration_minutes=3 + i,
+            duration_seconds=(3 + i) * 60,  # Convert minutes to seconds
             band_id=band.id
         )
         songs.append(song)
