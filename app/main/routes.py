@@ -448,9 +448,17 @@ def generate_setlist():
         time_learning = round(clustered_duration * learning_ratio)
         time_maintenance = clustered_duration - time_learning
         
-        # Get songs for the user's band
+        # Get songs for the current band
+        current_band_id = session.get('current_band_id')
+        if not current_band_id:
+            return jsonify({'error': 'No band selected'}), 400
+        
+        current_band = Band.query.get(current_band_id)
+        if not current_band:
+            return jsonify({'error': 'Band not found'}), 400
+        
         active_songs = Song.query.filter_by(
-            band_id=current_user.band_id,
+            band_id=current_band_id,
             status=SongStatus.ACTIVE
         ).all()
         
@@ -461,7 +469,7 @@ def generate_setlist():
         for song in active_songs:
             # Check if all members have mastered the song or are ready for rehearsal
             all_ready_or_mastered = True
-            for member in current_user.band.members:
+            for member in current_band.members:
                 progress = SongProgress.query.filter_by(
                     user_id=member.id,
                     song_id=song.id
@@ -937,7 +945,17 @@ def remove_member(member_id):
 @band_leader_required
 def setlist_config():
     """Setlist configuration management page for band leaders"""
-    band_config = current_user.band.get_setlist_config()
+    current_band_id = session.get('current_band_id')
+    if not current_band_id:
+        flash('No band selected. Please select a band first.', 'warning')
+        return redirect(url_for('main.select_band'))
+    
+    current_band = Band.query.get(current_band_id)
+    if not current_band:
+        flash('Band not found.', 'error')
+        return redirect(url_for('main.select_band'))
+    
+    band_config = current_band.get_setlist_config()
     return render_template('setlist_config.html', config=band_config)
 
 @main.route('/api/setlist/config', methods=['GET'])
@@ -945,7 +963,15 @@ def setlist_config():
 @band_leader_required
 def get_setlist_config():
     """Get current setlist configuration"""
-    band_config = current_user.band.get_setlist_config()
+    current_band_id = session.get('current_band_id')
+    if not current_band_id:
+        return jsonify({'error': 'No band selected'}), 400
+    
+    current_band = Band.query.get(current_band_id)
+    if not current_band:
+        return jsonify({'error': 'Band not found'}), 400
+    
+    band_config = current_band.get_setlist_config()
     return jsonify({
         'new_songs_buffer_percent': band_config.new_songs_buffer_percent,
         'learned_songs_buffer_percent': band_config.learned_songs_buffer_percent,
@@ -962,8 +988,16 @@ def get_setlist_config():
 def update_setlist_config():
     """Update setlist configuration"""
     try:
+        current_band_id = session.get('current_band_id')
+        if not current_band_id:
+            return jsonify({'error': 'No band selected'}), 400
+        
+        current_band = Band.query.get(current_band_id)
+        if not current_band:
+            return jsonify({'error': 'Band not found'}), 400
+        
         data = request.get_json()
-        band_config = current_user.band.get_setlist_config()
+        band_config = current_band.get_setlist_config()
         
         # Update configuration fields
         if 'new_songs_buffer_percent' in data:
@@ -1028,13 +1062,14 @@ def select_band():
     user_bands = current_user.bands
     
     if not user_bands:
-        # User has no bands - show create/join options instead of redirecting
+        # User has no bands - show create/join options
         flash('You are not a member of any bands. Create a new band or join an existing one.', 'info')
         return render_template('select_band.html', bands=[])
     
     if len(user_bands) == 1:
         # User has only one band - set it as current and redirect to dashboard
         session['current_band_id'] = user_bands[0].id
+        flash(f'Welcome to {user_bands[0].name}!', 'success')
         return redirect(url_for('main.dashboard'))
     
     # User has multiple bands - show selection page

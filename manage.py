@@ -8,7 +8,8 @@ import os
 import sys
 from datetime import datetime, date, timedelta
 from app import create_app, db
-from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus
+from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus, UserRole
+from sqlalchemy import text
 
 def create_tables():
     """Create all database tables"""
@@ -27,6 +28,9 @@ def seed_database():
         Song.query.delete()
         User.query.delete()
         Band.query.delete()
+        
+        # Clear band membership table
+        db.session.execute(text('DELETE FROM band_membership'))
         
         print("🗑️  Cleared existing data")
         
@@ -58,6 +62,23 @@ def seed_database():
         
         db.session.flush()
         print(f"👥 Created {len(users)} users")
+        
+        # Create new band membership records for the multi-band system
+        
+        for i, user in enumerate(users):
+            role = UserRole.LEADER if users_data[i]['is_leader'] else UserRole.MEMBER
+            # Insert into band_membership table
+            db.session.execute(
+                text('INSERT INTO band_membership (user_id, band_id, role, joined_at) VALUES (:user_id, :band_id, :role, :joined_at)'),
+                {
+                    'user_id': user.id,
+                    'band_id': band.id,
+                    'role': role.value,
+                    'joined_at': datetime.utcnow()
+                }
+            )
+        
+        print("🔗 Created band membership records")
         
         # Create demo songs
         songs_data = [

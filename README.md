@@ -10,37 +10,39 @@
 
 **"What's the next song?"** - Centralized management of new ideas. No more lost YouTube links or forgotten proposals in chat.
 
-## ✨ Key Features
+## ✨ What BandMate Does
 
-### 🎵 **Multi-Band Support**
-- Join multiple bands with different roles (Leader/Member)
-- Seamlessly switch between bands
-- Invitation system with secure codes
+### 🎵 **Multi-Band Management**
+BandMate supports musicians who play in multiple bands. Each band has its own workspace where members can track songs, progress, and generate setlists. The invitation system allows band leaders to invite new members with secure codes, while users can seamlessly switch between bands they belong to.
 
 ### 📊 **Smart Progress Tracking**
-- **Dashboard**: Visual progress table showing each member's status for every song
-- **Progress States**: 
-  - ⚪️ To Listen (not started)
-  - 🟡 In Practice (learning parts)
-  - 🟢 Ready for Rehearsal (can play with band)
-  - 🔵 Mastered (performance ready)
-- **Readiness Score**: Shows how many members are ready (e.g., "4/5 Ready")
+The core of BandMate is its visual progress dashboard. Each song displays a table where every band member can update their learning status:
+- **⚪️ To Listen**: Haven't started learning yet
+- **🟡 In Practice**: Currently working on parts, chords, or lyrics
+- **🟢 Ready for Rehearsal**: Can play the song start-to-finish with the band
+- **🔵 Mastered**: Performance-ready, knows it by heart
 
-### 🎼 **Advanced Setlist Generator**
-- **Intelligent Planning**: Balances learning new songs vs. maintaining mastered ones
-- **Customizable Buffers**: Configurable time buffers for new vs. learned songs
-- **Smart Scheduling**: Clusters time into 30-minute intervals
-- **Break Management**: Automatic breaks for sessions over 90 minutes
-- **Learning Ratio Control**: Adjust focus between new material and maintenance
+The system calculates a "readiness score" showing how many members are ready (e.g., "4/5 Ready"), helping bands identify which songs to focus on during rehearsals.
+
+### 🎼 **Intelligent Setlist Generation**
+BandMate's setlist generator acts as a virtual musical director. It creates optimized practice schedules by:
+- **Balancing Learning vs. Maintenance**: Allocates time between new songs and keeping mastered ones fresh
+- **Smart Time Management**: Clusters sessions into 30-minute intervals with configurable breaks
+- **Progress-Based Selection**: Prioritizes songs where most members are ready, maximizing rehearsal efficiency
+- **Customizable Buffers**: Adjusts time allocation based on whether songs are new (20% buffer) or mastered (10% buffer)
 
 ### 🎧 **Spotify Integration**
-- **Auto-complete**: Search songs and auto-fill metadata
-- **Rich Content**: Album artwork and track information
-- **Seamless Workflow**: Propose songs directly from Spotify search
+Adding new songs is seamless with Spotify integration. Search for any track and BandMate automatically fills in:
+- Song title and artist
+- Album artwork
+- Duration and metadata
+- Direct links to Spotify
 
-### 🗳️ **Democratic Song Management**
-- **Wishlist System**: Propose new songs with voting
-- **Band Approval**: Leaders can promote songs from wishlist to active repertoire
+### 🗳️ **Democratic Song Selection**
+The wishlist system lets every band member contribute:
+- **Propose Songs**: Suggest new tracks with optional notes
+- **Vote System**: Members can vote on proposed songs
+- **Band Approval**: Leaders can promote popular songs from wishlist to active repertoire
 
 ## 🏗️ Technical Stack
 
@@ -54,10 +56,12 @@
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.11+
-- Google OAuth credentials
-- Spotify API credentials (optional)
+1. **Setup**: Clone the repository and install dependencies
+2. **Configure**: Set up Google OAuth and optional Spotify API credentials
+3. **Create Band**: Start your first band or join existing ones
+4. **Add Songs**: Use Spotify search or manual entry
+5. **Track Progress**: Update your learning status for each song
+6. **Generate Setlists**: Create optimized practice schedules
 
 ### Setup
 ```bash
@@ -151,4 +155,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**BandMate** transforms band coordination from chaotic messaging to structured, productive practice sessions. 🎸✨
+**BandMate** - Because great music happens when everyone knows what they're doing. 🎸✨

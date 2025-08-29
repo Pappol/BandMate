@@ -13,34 +13,51 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted mb-4">
-                        You're a member of multiple bands. Choose which one you'd like to work with:
-                    </p>
-                    
-                    <div class="row">
-                        {% for band in bands %}
-                        <div class="col-md-6 mb-3">
-                            <div class="card h-100 border-primary">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title text-primary">{{ band.name }}</h5>
-                                    <p class="card-text">
-                                        <small class="text-muted">
-                                            {% if current_user.is_leader_of(band.id) %}
-                                                <span class="badge bg-success">Leader</span>
-                                            {% else %}
-                                                <span class="badge bg-info">Member</span>
-                                            {% endif %}
-                                        </small>
-                                    </p>
-                                    <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
-                                       class="btn btn-primary btn-sm">
-                                        <i class="fas fa-sign-in-alt"></i> Select This Band
-                                    </a>
+                    {% if bands %}
+                        {% if bands|length == 1 %}
+                            <p class="text-muted mb-4">
+                                You're a member of one band. Redirecting you to the dashboard...
+                            </p>
+                            <div class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
                             </div>
-                        </div>
-                        {% endfor %}
-                    </div>
+                        {% else %}
+                            <p class="text-muted mb-4">
+                                You're a member of multiple bands. Choose which one you'd like to work with:
+                            </p>
+                            
+                            <div class="row">
+                                {% for band in bands %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100 border-primary">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title text-primary">{{ band.name }}</h5>
+                                            <p class="card-text">
+                                                <small class="text-muted">
+                                                    {% if current_user.is_leader_of(band.id) %}
+                                                        <span class="badge bg-success">Leader</span>
+                                                    {% else %}
+                                                        <span class="badge bg-info">Member</span>
+                                                    {% endif %}
+                                                </small>
+                                            </p>
+                                            <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
+                                               class="btn btn-primary btn-sm">
+                                                <i class="fas fa-sign-in-alt"></i> Select This Band
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-4">
+                            You are not a member of any bands. Create a new band or join an existing one.
+                        </p>
+                    {% endif %}
                     
                     <hr class="my-4">
                     
@@ -84,4 +101,13 @@
         </div>
     </div>
 </div>
+
+{% if bands and bands|length == 1 %}
+<script>
+    // Auto-redirect if user has only one band
+    setTimeout(function() {
+        window.location.href = "{{ url_for('main.dashboard') }}";
+    }, 1000);
+</script>
+{% endif %}
 {% endblock %}
