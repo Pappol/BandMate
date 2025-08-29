@@ -156,18 +156,18 @@ def generate_setlist():
         maintenance_pool = []
         
         for song in active_songs:
-            # Check if all members have mastered the song
-            all_mastered = True
+            # Check if all members have mastered the song or are ready for rehearsal
+            all_ready_or_mastered = True
             for member in current_user.band.members:
                 progress = SongProgress.query.filter_by(
                     user_id=member.id,
                     song_id=song.id
                 ).first()
-                if not progress or progress.status != ProgressStatus.MASTERED:
-                    all_mastered = False
+                if not progress or progress.status not in [ProgressStatus.READY_FOR_REHEARSAL, ProgressStatus.MASTERED]:
+                    all_ready_or_mastered = False
                     break
             
-            if all_mastered:
+            if all_ready_or_mastered:
                 maintenance_pool.append(song)
             else:
                 learning_pool.append(song)
@@ -177,6 +177,8 @@ def generate_setlist():
         
         # Sort maintenance pool by last rehearsed date (oldest first)
         maintenance_pool.sort(key=lambda x: x.last_rehearsed_on or date.min)
+        
+
         
         # Build learning setlist
         learning_setlist = []

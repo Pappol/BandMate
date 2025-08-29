@@ -1,13 +1,19 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager
-from flask_dance.contrib.google import make_google_blueprint
 import os
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+# Set OAuth insecure transport for development BEFORE importing OAuth libraries
+if os.getenv('FLASK_ENV') == 'development' or os.getenv('FLASK_DEBUG') == '1':
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+    print("⚠️  Development mode: OAuth insecure transport enabled")
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_login import LoginManager
+from flask_dance.contrib.google import make_google_blueprint
 
 # Initialize extensions
 db = SQLAlchemy()

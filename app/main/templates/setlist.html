@@ -18,9 +18,12 @@
         </div>
     </div>
 
-    <!-- Generator Form -->
-    <div class="bg-white shadow rounded-lg p-6">
+            <!-- Generator Form and Results Container -->
         <div x-data="setlistGenerator()" class="space-y-6">
+
+
+        <!-- Generator Form -->
+        <div class="bg-white shadow rounded-lg p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="duration" class="block text-sm font-medium text-gray-700">
@@ -74,10 +77,9 @@
                 </button>
             </div>
         </div>
-    </div>
 
-    <!-- Results -->
-    <div x-data="setlistGenerator()" x-show="setlist.length > 0" class="bg-white shadow rounded-lg overflow-hidden">
+        <!-- Results -->
+        <div x-show="setlist && setlist.length > 0" x-cloak class="bg-white shadow rounded-lg overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Generated Setlist</h3>
         </div>
@@ -171,6 +173,8 @@
             </div>
         </div>
     </div>
+        </div>
+    </div>
 </div>
 
 <!-- Alpine.js Component -->
@@ -182,6 +186,8 @@ function setlistGenerator() {
         generating: false,
         setlist: [],
         summary: {},
+        
+
         
         generateSetlist() {
             this.generating = true;
@@ -257,6 +263,11 @@ function setlistGenerator() {
     cursor: pointer;
     border: none;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Alpine.js x-cloak directive */
+[x-cloak] {
+    display: none !important;
 }
 </style>
 {% endblock %}
