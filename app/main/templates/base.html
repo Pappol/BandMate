@@ -67,6 +67,25 @@
             </div>
         </div>
     </nav>
+    {% else %}
+    <!-- Simple header for unauthenticated users -->
+    <nav class="bg-indigo-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <a href="{{ url_for('main.index') }}" class="text-white text-xl font-bold">🎸 BandMate</a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <a href="{{ url_for('main.login') }}" 
+                       class="text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium">
+                        Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
     {% endif %}
 
     <!-- Flash Messages -->
@@ -102,7 +121,7 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="{% if current_user.is_authenticated %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8{% endif %}">
         {% block content %}{% endblock %}
     </main>
 

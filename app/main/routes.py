@@ -10,10 +10,10 @@ import json
 
 @main.route('/')
 def index():
-    """Home page - redirect to dashboard if logged in, otherwise show login"""
+    """Home page - show landing page for new users, redirect to dashboard if logged in"""
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
-    return render_template('login.html', config=current_app.config)
+    return render_template('landing.html', config=current_app.config)
 
 @main.route('/login')
 def login():
@@ -39,6 +39,187 @@ def demo_login(email):
 def google_login():
     """Initiate Google OAuth login"""
     return handle_google_login()
+
+@main.route('/login/google/authorized')
+def google_authorized():
+    """Handle Google OAuth callback and user creation"""
+    if not google.authorized:
+        flash('Google OAuth failed. Please try again.', 'error')
+        return redirect(url_for('main.login'))
+    
+    try:
+        resp = google.get('/oauth2/v2/userinfo')
+        if resp.ok:
+            google_user_info = resp.json()
+            
+            # Check if user exists
+            user = User.query.filter_by(email=google_user_info['email']).first()
+            
+            if not user:
+                # New user - redirect to onboarding
+                session['google_user_info'] = google_user_info
+                return redirect(url_for('main.onboarding'))
+            
+            # Existing user - log them in
+            login_user(user)
+            flash(f'Welcome back, {user.name}!', 'success')
+            return redirect(url_for('main.dashboard'))
+            
+    except Exception as e:
+        current_app.logger.error(f"Google OAuth error: {e}")
+        flash('Authentication failed. Please try again.', 'error')
+        return redirect(url_for('main.login'))
+    
+    flash('Authentication failed. Please try again.', 'error')
+    return redirect(url_for('main.login'))
+
+@main.route('/onboarding')
+def onboarding():
+    """Onboarding page for new users"""
+    if 'google_user_info' not in session:
+        flash('Please log in with Google first.', 'warning')
+        return redirect(url_for('main.login'))
+    
+    google_user_info = session['google_user_info']
+    
+    # Check if user already exists (in case they refresh the page)
+    existing_user = User.query.filter_by(email=google_user_info['email']).first()
+    if existing_user:
+        login_user(existing_user)
+        session.pop('google_user_info', None)
+        return redirect(url_for('main.dashboard'))
+    
+    return render_template('onboarding.html', user_info=google_user_info)
+
+@main.route('/create_band', methods=['POST'])
+def create_band():
+    """Create a new band and user"""
+    if 'google_user_info' not in session:
+        flash('Please log in with Google first.', 'warning')
+        return redirect(url_for('main.login'))
+    
+    band_name = request.form.get('band_name')
+    if not band_name:
+        flash('Band name is required.', 'error')
+        return redirect(url_for('main.onboarding'))
+    
+    google_user_info = session['google_user_info']
+    
+    try:
+        # Create new band
+        band = Band(name=band_name)
+        db.session.add(band)
+        db.session.flush()  # Get the ID
+        
+        # Create new user
+        user = User(
+            id=google_user_info['id'],
+            name=google_user_info['name'],
+            email=google_user_info['email'],
+            band_id=band.id,
+            is_band_leader=True  # Creator becomes leader
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        # Log in the user
+        login_user(user)
+        session.pop('google_user_info', None)
+        
+        flash(f'Welcome to BandMate! Your band "{band_name}" has been created.', 'success')
+        return redirect(url_for('main.dashboard'))
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error creating band: {e}")
+        flash('Failed to create band. Please try again.', 'error')
+        return redirect(url_for('main.onboarding'))
+
+@main.route('/join_band', methods=['POST'])
+def join_band():
+    """Join an existing band"""
+    if 'google_user_info' not in session:
+        flash('Please log in with Google first.', 'warning')
+        return redirect(url_for('main.login'))
+    
+    invitation_code = request.form.get('invitation_code')
+    if not invitation_code:
+        flash('Invitation code is required.', 'error')
+        return redirect(url_for('main.onboarding'))
+    
+    google_user_info = session['google_user_info']
+    
+    # For now, we'll use a simple approach - join the first available band
+    # In a real app, you'd have proper invitation codes
+    band = Band.query.first()
+    if not band:
+        flash('No bands available to join.', 'error')
+        return redirect(url_for('main.onboarding'))
+    
+    try:
+        # Create new user
+        user = User(
+            id=google_user_info['id'],
+            name=google_user_info['name'],
+            email=google_user_info['email'],
+            band_id=band.id,
+            is_band_leader=False
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        # Log in the user
+        login_user(user)
+        session.pop('google_user_info', None)
+        
+        flash(f'Welcome to BandMate! You\'ve joined "{band.name}".', 'success')
+        return redirect(url_for('main.dashboard'))
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error joining band: {e}")
+        flash('Failed to join band. Please try again.', 'error')
+        return redirect(url_for('main.onboarding'))
+
+@main.route('/demo_mode')
+def demo_mode():
+    """Demo mode for new users"""
+    if 'google_user_info' not in session:
+        flash('Please log in with Google first.', 'warning')
+        return redirect(url_for('main.login'))
+    
+    google_user_info = session['google_user_info']
+    
+    try:
+        # Create demo user and assign to demo band
+        demo_band = Band.query.filter_by(name="The Demo Band").first()
+        if not demo_band:
+            demo_band = Band(name="The Demo Band")
+            db.session.add(demo_band)
+            db.session.flush()
+        
+        user = User(
+            id=google_user_info['id'],
+            name=google_user_info['name'],
+            email=google_user_info['email'],
+            band_id=demo_band.id,
+            is_band_leader=False
+        )
+        db.session.add(user)
+        db.session.commit()
+        
+        # Log in the user
+        login_user(user)
+        session.pop('google_user_info', None)
+        
+        flash('Welcome to BandMate! You\'re now in demo mode with sample data.', 'success')
+        return redirect(url_for('main.dashboard'))
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error creating demo user: {e}")
+        flash('Failed to enter demo mode. Please try again.', 'error')
+        return redirect(url_for('main.onboarding'))
 
 @main.route('/logout')
 @login_required
