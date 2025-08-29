@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Create New Band - BandMate{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> Create New Band
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Start a new band and become its leader. You can invite other musicians to join later.
+                    </p>
+                    
+                    <form method="POST" action="{{ url_for('main.create_new_band') }}">
+                        <div class="mb-3">
+                            <label for="band_name" class="form-label">Band Name</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="band_name" 
+                                   name="band_name" 
+                                   placeholder="Enter your band name"
+                                   required
+                                   maxlength="100">
+                            <div class="form-text">
+                                Choose a unique and memorable name for your band.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus"></i> Create Band
+                            </button>
+                            <a href="{{ url_for('main.select_band') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Band Selection
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        As the band creator, you'll automatically become the band leader with full management permissions.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

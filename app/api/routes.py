@@ -1,8 +1,8 @@
-from flask import jsonify, request
+from flask import jsonify, request, session
 from flask_login import current_user, login_required
 from app.api import api
 from app.auth import band_leader_required
-from app.models import Song, SongProgress, Vote, SongStatus, ProgressStatus
+from app.models import Song, SongProgress, Vote, SongStatus, ProgressStatus, Band
 from app import db
 from datetime import datetime
 
@@ -24,10 +24,15 @@ def update_progress():
         except ValueError:
             return jsonify({'error': 'Invalid status'}), 400
         
+        # Get current band from session
+        current_band_id = session.get('current_band_id')
+        if not current_band_id:
+            return jsonify({'error': 'No band selected'}), 400
+        
         # Check if song exists and user has access
         song = Song.query.filter_by(
             id=song_id,
-            band_id=current_user.band_id
+            band_id=current_band_id
         ).first()
         
         if not song:
@@ -76,10 +81,15 @@ def toggle_vote():
         if not song_id:
             return jsonify({'error': 'Missing song_id'}), 400
         
+        # Get current band from session
+        current_band_id = session.get('current_band_id')
+        if not current_band_id:
+            return jsonify({'error': 'No band selected'}), 400
+        
         # Check if song exists and is in wishlist
         song = Song.query.filter_by(
             id=song_id,
-            band_id=current_user.band_id,
+            band_id=current_band_id,
             status=SongStatus.WISHLIST
         ).first()
         
@@ -132,10 +142,15 @@ def approve_song():
         if not song_id:
             return jsonify({'error': 'Missing song_id'}), 400
         
+        # Get current band from session
+        current_band_id = session.get('current_band_id')
+        if not current_band_id:
+            return jsonify({'error': 'No band selected'}), 400
+        
         # Check if song exists and is in wishlist
         song = Song.query.filter_by(
             id=song_id,
-            band_id=current_user.band_id,
+            band_id=current_band_id,
             status=SongStatus.WISHLIST
         ).first()
         
@@ -146,7 +161,8 @@ def approve_song():
         song.status = SongStatus.ACTIVE
         
         # Create progress records for all band members
-        for member in current_user.band.members:
+        current_band = Band.query.get(current_band_id)
+        for member in current_band.members:
             progress = SongProgress(
                 user_id=member.id,
                 song_id=song_id,
@@ -170,9 +186,14 @@ def approve_song():
 def mark_rehearsed():
     """Mark song as rehearsed today"""
     try:
+        # Get current band from session
+        current_band_id = session.get('current_band_id')
+        if not current_band_id:
+            return jsonify({'error': 'No band selected'}), 400
+        
         song = Song.query.filter_by(
             id=song_id,
-            band_id=current_user.band_id
+            band_id=current_band_id
         ).first()
         
         if not song:

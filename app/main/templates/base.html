@@ -104,9 +104,57 @@
                 </div>
                 <div class="flex items-center">
                     <div class="flex items-center space-x-4">
+                        <!-- Band Switcher -->
+                        {% if current_user.bands|length > 1 %}
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" 
+                                    class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                                <i class="fas fa-users mr-2"></i>
+                                {% if current_band %}
+                                    {{ current_band.name }}
+                                {% else %}
+                                    Select Band
+                                {% endif %}
+                                <i class="fas fa-chevron-down ml-2"></i>
+                            </button>
+                            
+                            <div x-show="open" 
+                                 @click.away="open = false"
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-75"
+                                 x-transition:leave-start="transform opacity-100 scale-100"
+                                 x-transition:leave-end="transform opacity-0 scale-95"
+                                 class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
+                                 {% for band in current_user.bands %}
+                                 <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if current_band and current_band.id == band.id %}bg-primary-light text-white{% endif %}">
+                                    <div class="flex items-center justify-between">
+                                        <span>{{ band.name }}</span>
+                                        {% if current_user.is_leader_of(band.id) %}
+                                            <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
+                                        {% endif %}
+                                    </div>
+                                 </a>
+                                 {% endfor %}
+                                 <div class="border-t border-gray-100 my-1"></div>
+                                 <a href="{{ url_for('main.select_band') }}" 
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-cog mr-2"></i> Manage Bands
+                                 </a>
+                            </div>
+                        </div>
+                        {% elif current_band %}
+                        <span class="text-white text-sm">
+                            <i class="fas fa-users mr-2"></i>
+                            {{ current_band.name }}
+                        </span>
+                        {% endif %}
+                        
                         <span class="text-white text-sm">
                             {{ current_user.name }}
-                            {% if current_user.is_band_leader %}
+                            {% if current_band and current_user.is_leader_of(current_band.id) %}
                                 <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
                             {% endif %}
                         </span>

@@ -2,6 +2,7 @@ from app import db
 from flask_login import UserMixin
 from datetime import datetime, date, timedelta
 from enum import Enum
+from sqlalchemy import text
 import uuid
 
 class SongStatus(Enum):
@@ -18,6 +19,18 @@ class InvitationStatus(Enum):
     PENDING = 'pending'
     ACCEPTED = 'accepted'
     EXPIRED = 'expired'
+
+class UserRole(Enum):
+    LEADER = 'leader'
+    MEMBER = 'member'
+
+# Association table for many-to-many relationship between User and Band
+band_membership = db.Table('band_membership',
+    db.Column('user_id', db.String(50), db.ForeignKey('users.id'), primary_key=True),
+    db.Column('band_id', db.Integer, db.ForeignKey('bands.id'), primary_key=True),
+    db.Column('role', db.Enum(UserRole), default=UserRole.MEMBER, nullable=False),
+    db.Column('joined_at', db.DateTime, default=datetime.utcnow)
+)
 
 class Invitation(db.Model):
     """Band invitation model"""
@@ -66,18 +79,50 @@ class User(UserMixin, db.Model):
     id = db.Column(db.String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    band_id = db.Column(db.Integer, db.ForeignKey('bands.id'), nullable=False)
+    # Legacy columns - kept for backward compatibility during migration
+    band_id = db.Column(db.Integer, db.ForeignKey('bands.id'), nullable=True)
     is_band_leader = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relationships
-    band = db.relationship('Band', back_populates='members')
+    # New many-to-many relationship with bands
+    bands = db.relationship('Band', secondary=band_membership, back_populates='members')
+    
+    # Legacy relationship - kept for backward compatibility
+    band = db.relationship('Band', foreign_keys=[band_id], back_populates='legacy_members')
+    
+    # Other relationships
     progress = db.relationship('SongProgress', back_populates='user', cascade='all, delete-orphan')
     votes = db.relationship('Vote', back_populates='user', cascade='all, delete-orphan')
     sent_invitations = db.relationship('Invitation', foreign_keys='Invitation.invited_by', back_populates='inviter')
     
     def __repr__(self):
         return f'<User {self.name}>'
+    
+    def get_band_role(self, band_id):
+        """Get the user's role in a specific band"""
+        from sqlalchemy import text
+        result = db.session.execute(
+            text('SELECT role FROM band_membership WHERE user_id = :user_id AND band_id = :band_id'),
+            {'user_id': self.id, 'band_id': band_id}
+        ).fetchone()
+        return result[0] if result else None
+    
+    def is_leader_of(self, band_id):
+        """Check if user is a leader of a specific band"""
+        role = self.get_band_role(band_id)
+        return role == UserRole.LEADER.value
+    
+    def is_member_of(self, band_id):
+        """Check if user is a member of a specific band"""
+        role = self.get_band_role(band_id)
+        return role is not None
+    
+    def get_primary_band(self):
+        """Get the user's primary band (first band they joined)"""
+        if self.bands:
+            return self.bands[0]
+        # Fallback to legacy band if no bands in new system
+        return self.band
 
 class Band(db.Model):
     """Band model"""
@@ -87,14 +132,48 @@ class Band(db.Model):
     name = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relationships
-    members = db.relationship('User', back_populates='band', cascade='all, delete-orphan')
+    # New many-to-many relationship with users
+    members = db.relationship('User', secondary=band_membership, back_populates='bands')
+    
+    # Legacy relationship - kept for backward compatibility
+    legacy_members = db.relationship('User', foreign_keys='User.band_id', back_populates='band')
+    
+    # Other relationships
     songs = db.relationship('Song', back_populates='band', cascade='all, delete-orphan')
     invitations = db.relationship('Invitation', back_populates='band', cascade='all, delete-orphan')
     setlist_config = db.relationship('SetlistConfig', back_populates='band', uselist=False, cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Band {self.name}>'
+    
+    def get_member_role(self, user_id):
+        """Get a specific member's role in this band"""
+        from sqlalchemy import text
+        result = db.session.execute(
+            text('SELECT role FROM band_membership WHERE user_id = :user_id AND band_id = :band_id'),
+            {'user_id': user_id, 'band_id': self.id}
+        ).fetchone()
+        return result[0] if result else None
+    
+    def add_member(self, user, role=UserRole.MEMBER):
+        """Add a user to this band with a specific role"""
+        if not user.is_member_of(self.id):
+            # Insert into band_membership table
+            db.session.execute(
+                text('INSERT INTO band_membership (user_id, band_id, role) VALUES (:user_id, :band_id, :role)'),
+                {'user_id': user.id, 'band_id': self.id, 'role': role.value}
+            )
+            db.session.commit()
+            return True
+        return False
+    
+    def remove_member(self, user_id):
+        """Remove a user from this band"""
+        db.session.execute(
+            text('DELETE FROM band_membership WHERE user_id = :user_id AND band_id = :band_id'),
+            {'user_id': user_id, 'band_id': self.id}
+        )
+        db.session.commit()
     
     def get_setlist_config(self):
         """Get or create default setlist configuration for the band"""

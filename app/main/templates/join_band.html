@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Join Band - BandMate{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-plus"></i> Join a Band
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Enter the invitation code you received from a band leader to join their band.
+                    </p>
+                    
+                    <form method="POST" action="{{ url_for('main.join_band') }}">
+                        <div class="mb-3">
+                            <label for="invitation_code" class="form-label">Invitation Code</label>
+                            <input type="text" 
+                                   class="form-control form-control-lg text-center" 
+                                   id="invitation_code" 
+                                   name="invitation_code" 
+                                   placeholder="e.g., ABC12345"
+                                   required
+                                   maxlength="10"
+                                   pattern="[A-Z0-9]{8}"
+                                   style="font-family: monospace; font-size: 1.2em;">
+                            <div class="form-text">
+                                Enter the 8-character invitation code exactly as provided.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Join Band
+                            </button>
+                            <a href="{{ url_for('main.select_band') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Band Selection
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer bg-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Need an invitation?</strong><br>
+                                Ask a band leader to send you an invitation code.
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i>
+                                <strong>Invitations expire</strong><br>
+                                after 7 days for security.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-format invitation code input
+document.getElementById('invitation_code').addEventListener('input', function(e) {
+    // Convert to uppercase and remove non-alphanumeric characters
+    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    
+    // Limit to 8 characters
+    if (this.value.length > 8) {
+        this.value = this.value.slice(0, 8);
+    }
+});
+</script>
+{% endblock %}

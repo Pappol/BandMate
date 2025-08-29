@@ -65,54 +65,54 @@ def seed_database():
                 "title": "Bohemian Rhapsody",
                 "artist": "Queen",
                 "status": SongStatus.ACTIVE,
-                "duration_minutes": 6,
+                "duration_seconds": 360,
                 "last_rehearsed_on": date.today() - timedelta(days=2)
             },
             {
                 "title": "Hotel California",
                 "artist": "Eagles",
                 "status": SongStatus.ACTIVE,
-                "duration_minutes": 6,
+                "duration_seconds": 360,
                 "last_rehearsed_on": date.today() - timedelta(days=7)
             },
             {
                 "title": "Stairway to Heaven",
                 "artist": "Led Zeppelin",
                 "status": SongStatus.ACTIVE,
-                "duration_minutes": 8,
+                "duration_seconds": 480,
                 "last_rehearsed_on": date.today() - timedelta(days=14)
             },
             {
                 "title": "Sweet Child O' Mine",
                 "artist": "Guns N' Roses",
                 "status": SongStatus.ACTIVE,
-                "duration_minutes": 5,
+                "duration_seconds": 300,
                 "last_rehearsed_on": date.today() - timedelta(days=21)
             },
             {
                 "title": "Wonderwall",
                 "artist": "Oasis",
                 "status": SongStatus.ACTIVE,
-                "duration_minutes": 4,
+                "duration_seconds": 240,
                 "last_rehearsed_on": date.today() - timedelta(days=30)
             },
             {
                 "title": "Creep",
                 "artist": "Radiohead",
                 "status": SongStatus.WISHLIST,
-                "duration_minutes": 4
+                "duration_seconds": 240
             },
             {
                 "title": "Zombie",
                 "artist": "The Cranberries",
                 "status": SongStatus.WISHLIST,
-                "duration_minutes": 5
+                "duration_seconds": 300
             },
             {
                 "title": "Smells Like Teen Spirit",
                 "artist": "Nirvana",
                 "status": SongStatus.WISHLIST,
-                "duration_minutes": 5
+                "duration_seconds": 300
             }
         ]
         
@@ -122,7 +122,7 @@ def seed_database():
                 title=song_data['title'],
                 artist=song_data['artist'],
                 status=song_data['status'],
-                duration_minutes=song_data['duration_minutes'],
+                duration_seconds=song_data['duration_seconds'],
                 last_rehearsed_on=song_data.get('last_rehearsed_on'),
                 band_id=band.id
             )

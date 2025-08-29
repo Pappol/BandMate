@@ -85,4 +85,17 @@ def create_app(config_name=None):
         from app.models import User
         return User.query.get(user_id)
     
+    # Context processor to make current band available in all templates
+    @app.context_processor
+    def inject_current_band():
+        """Make current band available in all templates"""
+        from app.models import Band
+        from flask import session
+        current_band = None
+        
+        if 'current_band_id' in session:
+            current_band = Band.query.get(session['current_band_id'])
+        
+        return dict(current_band=current_band)
+    
     return app

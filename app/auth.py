@@ -2,7 +2,7 @@ from functools import wraps
 from flask import current_app, redirect, url_for, flash, session
 from flask_login import current_user, login_user, logout_user
 from flask_dance.contrib.google import google
-from app.models import User, Band
+from app.models import User, Band, UserRole
 from app import db
 
 def login_required(f):
@@ -23,7 +23,13 @@ def band_leader_required(f):
             flash('Please log in to access this page.', 'warning')
             return redirect(url_for('main.login'))
         
-        if not current_user.is_band_leader:
+        # Get current band from session
+        current_band_id = session.get('current_band_id')
+        if not current_band_id:
+            flash('No band selected. Please select a band first.', 'warning')
+            return redirect(url_for('main.select_band'))
+        
+        if not current_user.is_leader_of(current_band_id):
             flash('Only band leaders can perform this action.', 'error')
             return redirect(url_for('main.dashboard'))
         
@@ -52,16 +58,30 @@ def handle_google_login():
                 user = User(
                     id=google_user_info['id'],
                     name=google_user_info['name'],
-                    email=google_user_info['email'],
-                    band_id=default_band.id,
-                    is_band_leader=len(default_band.members) == 0  # First user becomes leader
+                    email=google_user_info['email']
                 )
                 db.session.add(user)
+                db.session.flush()  # Get the user ID
+                
+                # Add user to default band
+                role = UserRole.LEADER if len(default_band.members) == 0 else UserRole.MEMBER
+                default_band.add_member(user, role)
+                
+                # Set current band in session
+                session['current_band_id'] = default_band.id
+                
                 db.session.commit()
             
             # Log in the user
             login_user(user)
-            return redirect(url_for('main.dashboard'))
+            
+            # Check if user has any bands
+            if user.bands:
+                # User has bands - redirect to band selection
+                return redirect(url_for('main.select_band'))
+            else:
+                # User has no bands - redirect to band selection (which will show create/join options)
+                return redirect(url_for('main.select_band'))
             
     except Exception as e:
         current_app.logger.error(f"Google OAuth error: {e}")

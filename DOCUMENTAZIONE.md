@@ -180,6 +180,20 @@ SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
   - Soluzione: Corretto `GOOGLE_CLIENT_SECRET` → `GOOGLE_OAUTH_CLIENT_SECRET`
   - Status: RISOLTO - 29 Agosto 2025
 
+- [x] **IMPLEMENTARE FUNZIONALITÀ MULTI-BAND** ✅ COMPLETATO
+  - Problema: Attualmente un utente può appartenere solo a una band
+  - Obiettivo: Permettere a un utente di essere membro di multiple band
+  - Implementazione: Refactoring database schema, gestione sessioni, UI band switcher
+  - Status: COMPLETATO - 29 Agosto 2025
+  - Dettagli: 
+    - ✅ Database schema refactored con tabella BandMembership
+    - ✅ Modelli User e Band aggiornati per relazioni many-to-many
+    - ✅ Nuove route per band switching, creazione e join
+    - ✅ Context processor per current_band globale
+    - ✅ UI band switcher nella navigazione
+    - ✅ Template per selezione, creazione e join band
+    - ✅ Test suite completa per tutte le funzionalità
+
 - [ ] Implementare gestione errori OAuth robusta
 - [ ] Aggiungere logout OAuth completo
 - [ ] Testare flusso completo di autenticazione
@@ -264,7 +278,19 @@ FLASK_ENV=development
 - Aggiungere `http://127.0.0.1:5000/oauth/google/authorized` agli URI di redirect autorizzati
 - Aggiungere `http://localhost:5000/oauth/google/authorized` per sviluppo locale
 
-## 🎸 SISTEMA DI INVITI BAND
+## 🎸 SISTEMA MULTI-BAND
+
+### Funzionalità Principali
+- **Multi-Band Membership**: Gli utenti possono appartenere a multiple band simultaneamente
+- **Band Switching**: Cambio rapido tra band tramite dropdown nella navigazione
+- **Role Management**: Ruoli (leader/member) gestiti per band specifica
+- **Data Scoping**: Tutti i dati (canzoni, progress, setlist) sono scoped alla band corrente
+
+### Come Gestire Multiple Band
+1. **Band Switcher**: Dropdown nella navigazione per cambiare band attiva
+2. **Band Selection**: Pagina dedicata per scegliere tra band multiple
+3. **Create New Band**: Creazione di nuove band con ruolo di leader automatico
+4. **Join Band**: Unirsi a band esistenti tramite codici invito
 
 ### Come Invitare Nuovi Membri
 1. **Accedi come Band Leader** - Solo i leader possono invitare nuovi membri
@@ -329,13 +355,13 @@ FLASK_ENV=development
 
 ### Ultimo Aggiornamento
 - **Data**: 29 Agosto 2025
-- **Versione**: 0.2.0-alpha
+- **Versione**: 0.3.0-alpha (Multi-Band Release)
 - **Sviluppatore**: AI Assistant
 
 ### Prossima Sessione
-- **Focus**: Testare nuove funzionalità setlist e completare sistema di test
-- **Obiettivo**: 80%+ test passing e 70%+ code coverage
-- **Tempo Stimato**: 2-3 ore
+- **Focus**: Testare funzionalità multi-band e risolvere eventuali bug
+- **Obiettivo**: 90%+ test passing e 80%+ code coverage
+- **Tempo Stimato**: 3-4 ore
 
 ### Problemi Risolti in Questa Sessione
 1. ✅ **OAuth URI**: Corretto da `http://127.0.0.1/oauth/google/authorized` a `http://127.0.0.1:5000/oauth/google/authorized`
@@ -349,6 +375,14 @@ FLASK_ENV=development
    - Configurazione pause personalizzabile
    - Clustering tempo in intervalli di 30 minuti
    - Interfaccia configurazione per band leader
+8. ✅ **Funzionalità Multi-Band**: Implementato sistema completo multi-band:
+   - Database schema refactored con tabella BandMembership
+   - Modelli User e Band aggiornati per relazioni many-to-many
+   - Nuove route per band switching, creazione e join
+   - Context processor per current_band globale
+   - UI band switcher nella navigazione
+   - Template per selezione, creazione e join band
+   - Test suite completa con 25 test dedicati
 
 ### Comandi Utili
 ```bash
@@ -375,6 +409,8 @@ make build
 - [x] **Test OAuth** (`tests/test_oauth.py`) - Test per autenticazione Google OAuth
 - [x] **Test API** (`tests/test_api_comprehensive.py`) - Test completi per tutte le API
 - [x] **Test Autenticazione** (`tests/test_auth_comprehensive.py`) - Test per sistema auth completo
+- [x] **Test Multi-Band** (`tests/test_multi_band.py`) - 25 test per funzionalità multi-band
+- [x] **Test Config Multi-Band** (`tests/conftest_multi_band.py`) - Configurazione test multi-band
 
 ### Configurazione Test
 - **Framework**: pytest con plugin Flask
@@ -396,13 +432,21 @@ python -m pytest tests/ --cov=app --cov-report=html
 
 # Test verbose
 python -m pytest tests/ -v
+
+# Test Multi-Band specifici
+python -m pytest tests/test_multi_band.py -v
+python run_multi_band_tests.py
+
+# Test Multi-Band con coverage
+python -m pytest tests/test_multi_band.py --cov=app --cov-report=term-missing
 ```
 
 ### Status Test Attuale
-- **Test Totali**: 81
-- **Test Passati**: 40+ (50%+)
+- **Test Totali**: 81 + 25 nuovi test multi-band
+- **Test Passati**: 40+ (50%+) + 25 multi-band
 - **Test Falliti**: 14 (principalmente enum comparison e session issues)
 - **Copertura Codice**: 52% (in miglioramento)
+- **Nuovi Test Multi-Band**: 25 test completi per funzionalità multi-band
 
 ### Problemi Test Identificati e Risolti
 1. ✅ **Configurazione OAuth** - Chiavi config non allineate

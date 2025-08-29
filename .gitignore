@@ -167,3 +167,6 @@ bandmate.db
 instance/
 .env.local
 .env.production
+.vscode/
+.cursor/
+cookies.txt

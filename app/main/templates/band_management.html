@@ -26,11 +26,11 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <p class="text-sm font-medium text-gray-500">Band Name</p>
-                <p class="text-lg text-gray-900">{{ current_user.band.name }}</p>
+                <p class="text-lg text-gray-900">{{ current_band.name }}</p>
             </div>
             <div>
                 <p class="text-sm font-medium text-gray-500">Total Members</p>
-                <p class="text-lg text-gray-900">{{ current_user.band.members|length }}</p>
+                <p class="text-lg text-gray-900">{{ band_members|length }}</p>
             </div>
         </div>
     </div>
@@ -39,7 +39,7 @@
     <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-lg font-medium text-gray-900 mb-4">Invite New Member</h2>
         
-        {% if current_user.is_band_leader %}
+        {% if current_user.is_leader_of(current_band.id) %}
         <form method="POST" action="{{ url_for('main.invite_member') }}" class="space-y-4">
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
@@ -106,7 +106,7 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    {% for member in current_user.band.members %}
+                    {% for member in band_members %}
                     <tr>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
@@ -122,7 +122,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            {% if member.is_band_leader %}
+                            {% if member.get_band_role(current_band.id) == 'leader' %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                 Band Leader
                             </span>
@@ -136,7 +136,7 @@
                             {{ member.created_at.strftime('%B %d, %Y') if member.created_at else 'Unknown' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            {% if current_user.is_band_leader and not member.is_band_leader %}
+                            {% if current_user.is_leader_of(current_band.id) and member.get_band_role(current_band.id) != 'leader' %}
                             <button onclick="confirmRemoveMember('{{ member.id }}', '{{ member.name }}')"
                                     class="text-red-600 hover:text-red-900">
                                 Remove
@@ -151,7 +151,7 @@
     </div>
 
     <!-- Pending Invitations -->
-    {% if current_user.is_band_leader and pending_invitations %}
+    {% if current_user.is_leader_of(current_band.id) and pending_invitations %}
     <div class="bg-white shadow rounded-lg overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Pending Invitations</h3>
