@@ -1,6 +1,6 @@
 from app import db
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from enum import Enum
 import uuid
 
@@ -13,6 +13,51 @@ class ProgressStatus(Enum):
     IN_PRACTICE = 'In Practice'
     READY_FOR_REHEARSAL = 'Ready for Rehearsal'
     MASTERED = 'Mastered'
+
+class InvitationStatus(Enum):
+    PENDING = 'pending'
+    ACCEPTED = 'accepted'
+    EXPIRED = 'expired'
+
+class Invitation(db.Model):
+    """Band invitation model"""
+    __tablename__ = 'invitations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(10), unique=True, nullable=False, index=True)
+    band_id = db.Column(db.Integer, db.ForeignKey('bands.id'), nullable=False)
+    invited_by = db.Column(db.String(50), db.ForeignKey('users.id'), nullable=False)
+    invited_email = db.Column(db.String(120), nullable=False)
+    status = db.Column(db.Enum(InvitationStatus), default=InvitationStatus.PENDING)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    band = db.relationship('Band', back_populates='invitations')
+    inviter = db.relationship('User', foreign_keys=[invited_by])
+    
+    def __repr__(self):
+        return f'<Invitation {self.code} for {self.invited_email}>'
+    
+    @staticmethod
+    def generate_code():
+        """Generate a unique 8-character invitation code"""
+        import random
+        import string
+        while True:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            if not Invitation.query.filter_by(code=code).first():
+                return code
+    
+    @property
+    def is_expired(self):
+        """Check if invitation has expired"""
+        return datetime.utcnow() > self.expires_at
+    
+    @property
+    def is_valid(self):
+        """Check if invitation is valid and not expired"""
+        return self.status == InvitationStatus.PENDING and not self.is_expired
 
 class User(UserMixin, db.Model):
     """User model for band members"""
@@ -29,6 +74,7 @@ class User(UserMixin, db.Model):
     band = db.relationship('Band', back_populates='members')
     progress = db.relationship('SongProgress', back_populates='user', cascade='all, delete-orphan')
     votes = db.relationship('Vote', back_populates='user', cascade='all, delete-orphan')
+    sent_invitations = db.relationship('Invitation', foreign_keys='Invitation.invited_by', back_populates='inviter')
     
     def __repr__(self):
         return f'<User {self.name}>'
@@ -44,6 +90,7 @@ class Band(db.Model):
     # Relationships
     members = db.relationship('User', back_populates='band', cascade='all, delete-orphan')
     songs = db.relationship('Song', back_populates='band', cascade='all, delete-orphan')
+    invitations = db.relationship('Invitation', back_populates='band', cascade='all, delete-orphan')
     
     def __repr__(self):
         return f'<Band {self.name}>'

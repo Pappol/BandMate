@@ -51,6 +51,21 @@
             </div>
             {% endif %}
             
+            <!-- Invitation Code Section -->
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                <h3 class="text-sm font-medium text-blue-800 mb-2">Have an invitation code?</h3>
+                <form method="GET" action="#" class="flex space-x-2" onsubmit="joinWithCode(event)">
+                    <input type="text" id="invitationCode" name="code" placeholder="Enter invitation code" 
+                           class="flex-1 border border-blue-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           pattern="[A-Z0-9]{8}" title="8-character invitation code" required>
+                    <button type="submit" 
+                            class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Join Band
+                    </button>
+                </form>
+                <p class="text-xs text-blue-600 mt-2">Enter the 8-character code you received from your band leader</p>
+            </div>
+
             <!-- Demo Login Section -->
             <div class="relative">
                 <div class="absolute inset-0 flex items-center">
@@ -81,6 +96,18 @@
                     By signing in, you agree to our terms of service and privacy policy
                 </p>
             </div>
+
+            <script>
+            function joinWithCode(event) {
+                event.preventDefault();
+                const code = document.getElementById('invitationCode').value.trim().toUpperCase();
+                if (code && code.length === 8) {
+                    window.location.href = `/band/join/${code}`;
+                } else {
+                    alert('Please enter a valid 8-character invitation code');
+                }
+            }
+            </script>
         </div>
         
         <!-- Features Preview -->

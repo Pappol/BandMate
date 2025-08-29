@@ -108,10 +108,14 @@ Vote (Voto)
 - [ ] Testare flusso completo di autenticazione
 
 ### 🟡 PRIORITÀ MEDIA - Funzionalità Core
-- [ ] **Sistema di Inviti per Band**
-  - Generazione codici invito univoci
-  - Validazione codici invito
-  - Notifiche email (opzionale)
+- [x] **Sistema di Inviti per Band** ✅
+  - Generazione codici invito univoci (8 caratteri alfanumerici)
+  - Validazione codici invito con scadenza (7 giorni)
+  - Pagina di gestione band con inviti e membri
+  - Interfaccia chiara per invitare nuovi membri
+  - Sistema di join tramite codice invito
+  - Gestione inviti in sospeso (resend, cancel)
+  - Rimozione membri (solo per band leader)
 
 - [ ] **Sistema di Notifiche**
   - Notifiche per progresso canzoni
@@ -176,6 +180,34 @@ FLASK_ENV=development
 - Aggiungere `http://127.0.0.1:5000/oauth/google/authorized` agli URI di redirect autorizzati
 - Aggiungere `http://localhost:5000/oauth/google/authorized` per sviluppo locale
 
+## 🎸 SISTEMA DI INVITI BAND
+
+### Come Invitare Nuovi Membri
+1. **Accedi come Band Leader** - Solo i leader possono invitare nuovi membri
+2. **Vai su Band Management** - Clicca il pulsante "Band Management" nella dashboard
+3. **Inserisci Email** - Compila il form con l'email del nuovo membro
+4. **Messaggio Personale** - Aggiungi un messaggio opzionale
+5. **Invia Invito** - Il sistema genera un codice univoco di 8 caratteri
+
+### Come Unirsi a una Band
+1. **Ricevi il Codice Invito** - Dal tuo band leader (es: "ABC12345")
+2. **Vai alla Pagina di Login** - Il form per il codice invito è in evidenza
+3. **Inserisci il Codice** - Digita il codice di 8 caratteri
+4. **Accedi o Registrati** - Usa Google OAuth per creare/accedere all'account
+5. **Unisciti Automaticamente** - Vieni aggiunto alla band automaticamente
+
+### Gestione Inviti
+- **Scadenza**: Gli inviti scadono dopo 7 giorni
+- **Resend**: I leader possono reinviare inviti non scaduti
+- **Cancel**: Gli inviti possono essere cancellati in qualsiasi momento
+- **Tracking**: Visualizza tutti gli inviti in sospeso nella pagina di gestione
+
+### Caratteristiche del Sistema
+- **Codici Univoci**: Ogni invito ha un codice di 8 caratteri unico
+- **Validazione**: Controlli automatici per email duplicate e inviti esistenti
+- **Sicurezza**: Solo i band leader possono gestire inviti e membri
+- **Interfaccia Chiara**: Design intuitivo per invitare e gestire membri
+
 ## 📊 METRICHE E MONITORAGGIO
 
 ### Performance
@@ -226,6 +258,7 @@ FLASK_ENV=development
 3. ✅ **OAuth Config**: Allineate chiavi di configurazione
 4. ✅ **Test Suite**: Creato sistema di test completo con 81 test
 5. ✅ **Demo Login**: Alice, Bob, Carla ora funzionano correttamente
+6. ✅ **Sistema Inviti**: Implementato sistema completo di inviti band con codici univoci
 
 ### Comandi Utili
 ```bash

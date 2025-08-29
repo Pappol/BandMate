@@ -3,9 +3,9 @@ from flask_login import current_user, login_user, logout_user
 from flask_dance.contrib.google import google
 from app.main import main
 from app.auth import login_required, band_leader_required, handle_google_login, logout
-from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus
+from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus, Invitation, InvitationStatus
 from app import db
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import json
 
 @main.route('/')
@@ -546,3 +546,190 @@ def handle_oauth_callback():
     
     flash('Authentication failed. Please try again.', 'error')
     return redirect(url_for('main.login'))
+
+@main.route('/band/management')
+@login_required
+def band_management():
+    """Band management page for leaders to invite and manage members"""
+    # Get pending invitations for the band
+    pending_invitations = []
+    if current_user.is_band_leader:
+        pending_invitations = Invitation.query.filter_by(
+            band_id=current_user.band_id,
+            status=InvitationStatus.PENDING
+        ).all()
+    
+    return render_template('band_management.html', pending_invitations=pending_invitations)
+
+@main.route('/band/invite', methods=['POST'])
+@login_required
+def invite_member():
+    """Invite a new member to the band"""
+    if not current_user.is_band_leader:
+        flash('Only band leaders can invite new members.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    email = request.form.get('email')
+    message = request.form.get('message', '')
+    
+    if not email:
+        flash('Email address is required.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    # Check if user already exists in the band
+    existing_user = User.query.filter_by(email=email, band_id=current_user.band_id).first()
+    if existing_user:
+        flash(f'{email} is already a member of your band.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    # Check if invitation already exists
+    existing_invitation = Invitation.query.filter_by(
+        invited_email=email,
+        band_id=current_user.band_id,
+        status=InvitationStatus.PENDING
+    ).first()
+    
+    if existing_invitation:
+        flash(f'An invitation has already been sent to {email}.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    try:
+        # Create new invitation
+        invitation = Invitation(
+            code=Invitation.generate_code(),
+            band_id=current_user.band_id,
+            invited_by=current_user.id,
+            invited_email=email,
+            expires_at=datetime.utcnow() + timedelta(days=7)  # Expires in 7 days
+        )
+        db.session.add(invitation)
+        db.session.commit()
+        
+        # In a real app, you would send an email here
+        # For now, we'll just show the invitation code
+        flash(f'Invitation sent to {email}! Invitation code: {invitation.code}', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error creating invitation: {e}")
+        flash('Failed to send invitation. Please try again.', 'error')
+    
+    return redirect(url_for('main.band_management'))
+
+@main.route('/band/join/<invitation_code>')
+def join_band_with_code(invitation_code):
+    """Join a band using an invitation code"""
+    if current_user.is_authenticated:
+        flash('You are already logged in. Please log out first to join with a different account.', 'warning')
+        return redirect(url_for('main.dashboard'))
+    
+    # Find the invitation
+    invitation = Invitation.query.filter_by(code=invitation_code).first()
+    
+    if not invitation:
+        flash('Invalid invitation code.', 'error')
+        return redirect(url_for('main.login'))
+    
+    if invitation.status != InvitationStatus.PENDING:
+        flash('This invitation has already been used or expired.', 'error')
+        return redirect(url_for('main.login'))
+    
+    if invitation.is_expired:
+        flash('This invitation has expired.', 'error')
+        return redirect(url_for('main.login'))
+    
+    # Store invitation info in session for the join process
+    session['invitation_code'] = invitation_code
+    session['invited_band_id'] = invitation.band_id
+    
+    flash(f'You have been invited to join {invitation.band.name}! Please log in or create an account.', 'info')
+    return redirect(url_for('main.login'))
+
+@main.route('/band/resend-invitation/<int:invitation_id>', methods=['POST'])
+@login_required
+def resend_invitation(invitation_id):
+    """Resend an invitation"""
+    if not current_user.is_band_leader:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    invitation = Invitation.query.get_or_404(invitation_id)
+    
+    if invitation.band_id != current_user.band_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    if invitation.status != InvitationStatus.PENDING:
+        return jsonify({'error': 'Invitation cannot be resent'}), 400
+    
+    try:
+        # Extend expiration date
+        invitation.expires_at = datetime.utcnow() + timedelta(days=7)
+        db.session.commit()
+        
+        # In a real app, you would send an email here
+        flash(f'Invitation resent to {invitation.invited_email}', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error resending invitation: {e}")
+        return jsonify({'error': 'Failed to resend invitation'}), 500
+    
+    return jsonify({'success': True})
+
+@main.route('/band/cancel-invitation/<int:invitation_id>', methods=['POST'])
+@login_required
+def cancel_invitation(invitation_id):
+    """Cancel an invitation"""
+    if not current_user.is_band_leader:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    invitation = Invitation.query.get_or_404(invitation_id)
+    
+    if invitation.band_id != current_user.band_id:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        invitation.status = InvitationStatus.EXPIRED
+        db.session.commit()
+        flash(f'Invitation to {invitation.invited_email} cancelled.', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error cancelling invitation: {e}")
+        return jsonify({'error': 'Failed to cancel invitation'}), 500
+    
+    return jsonify({'success': True})
+
+@main.route('/band/remove-member/<string:member_id>', methods=['POST'])
+@login_required
+def remove_member(member_id):
+    """Remove a member from the band"""
+    if not current_user.is_band_leader:
+        flash('Only band leaders can remove members.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    if member_id == current_user.id:
+        flash('You cannot remove yourself from the band.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    member = User.query.get_or_404(member_id)
+    
+    if member.band_id != current_user.band_id:
+        flash('Member not found in your band.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    if member.is_band_leader:
+        flash('Cannot remove another band leader.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    try:
+        # Remove the member
+        db.session.delete(member)
+        db.session.commit()
+        flash(f'{member.name} has been removed from the band.', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error removing member: {e}")
+        flash('Failed to remove member. Please try again.', 'error')
+    
+    return redirect(url_for('main.band_management'))
