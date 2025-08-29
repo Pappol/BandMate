@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""
+BandMate Management Script
+Handles database operations, seeding, and other management tasks
+"""
+
+import os
+import sys
+from datetime import datetime, date, timedelta
+from app import create_app, db
+from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus
+
+def create_tables():
+    """Create all database tables"""
+    app = create_app()
+    with app.app_context():
+        db.create_all()
+        print("✅ Database tables created successfully")
+
+def seed_database():
+    """Seed the database with demo data"""
+    app = create_app()
+    with app.app_context():
+        # Clear existing data
+        Vote.query.delete()
+        SongProgress.query.delete()
+        Song.query.delete()
+        User.query.delete()
+        Band.query.delete()
+        
+        print("🗑️  Cleared existing data")
+        
+        # Create demo band
+        band = Band(name="The Demo Band")
+        db.session.add(band)
+        db.session.flush()  # Get the ID
+        
+        print(f"🎸 Created band: {band.name}")
+        
+        # Create demo users
+        users_data = [
+            {"name": "Alice Johnson", "email": "alice@demo.com", "is_leader": True},
+            {"name": "Bob Smith", "email": "bob@demo.com", "is_leader": False},
+            {"name": "Carla Rodriguez", "email": "carla@demo.com", "is_leader": False}
+        ]
+        
+        users = []
+        for user_data in users_data:
+            user = User(
+                id=f"demo_{user_data['email']}",
+                name=user_data['name'],
+                email=user_data['email'],
+                band_id=band.id,
+                is_band_leader=user_data['is_leader']
+            )
+            users.append(user)
+            db.session.add(user)
+        
+        db.session.flush()
+        print(f"👥 Created {len(users)} users")
+        
+        # Create demo songs
+        songs_data = [
+            {
+                "title": "Bohemian Rhapsody",
+                "artist": "Queen",
+                "status": SongStatus.ACTIVE,
+                "duration_minutes": 6,
+                "last_rehearsed_on": date.today() - timedelta(days=2)
+            },
+            {
+                "title": "Hotel California",
+                "artist": "Eagles",
+                "status": SongStatus.ACTIVE,
+                "duration_minutes": 6,
+                "last_rehearsed_on": date.today() - timedelta(days=7)
+            },
+            {
+                "title": "Stairway to Heaven",
+                "artist": "Led Zeppelin",
+                "status": SongStatus.ACTIVE,
+                "duration_minutes": 8,
+                "last_rehearsed_on": date.today() - timedelta(days=14)
+            },
+            {
+                "title": "Sweet Child O' Mine",
+                "artist": "Guns N' Roses",
+                "status": SongStatus.ACTIVE,
+                "duration_minutes": 5,
+                "last_rehearsed_on": date.today() - timedelta(days=21)
+            },
+            {
+                "title": "Wonderwall",
+                "artist": "Oasis",
+                "status": SongStatus.ACTIVE,
+                "duration_minutes": 4,
+                "last_rehearsed_on": date.today() - timedelta(days=30)
+            },
+            {
+                "title": "Creep",
+                "artist": "Radiohead",
+                "status": SongStatus.WISHLIST,
+                "duration_minutes": 4
+            },
+            {
+                "title": "Zombie",
+                "artist": "The Cranberries",
+                "status": SongStatus.WISHLIST,
+                "duration_minutes": 5
+            },
+            {
+                "title": "Smells Like Teen Spirit",
+                "artist": "Nirvana",
+                "status": SongStatus.WISHLIST,
+                "duration_minutes": 5
+            }
+        ]
+        
+        songs = []
+        for song_data in songs_data:
+            song = Song(
+                title=song_data['title'],
+                artist=song_data['artist'],
+                status=song_data['status'],
+                duration_minutes=song_data['duration_minutes'],
+                last_rehearsed_on=song_data.get('last_rehearsed_on'),
+                band_id=band.id
+            )
+            songs.append(song)
+            db.session.add(song)
+        
+        db.session.flush()
+        print(f"🎵 Created {len(songs)} songs")
+        
+        # Create progress records for active songs
+        progress_statuses = [ProgressStatus.TO_LISTEN, ProgressStatus.IN_PRACTICE, ProgressStatus.READY_FOR_REHEARSAL, ProgressStatus.MASTERED]
+        
+        for song in songs:
+            if song.status == SongStatus.ACTIVE:
+                for i, user in enumerate(users):
+                    # Vary progress based on user and song
+                    if i == 0:  # Alice (leader) - generally more advanced
+                        status = progress_statuses[min(3, i + 2)]
+                    elif i == 1:  # Bob - intermediate
+                        status = progress_statuses[min(3, i + 1)]
+                    else:  # Carla - beginner
+                        status = progress_statuses[i]
+                    
+                    progress = SongProgress(
+                        user_id=user.id,
+                        song_id=song.id,
+                        status=status
+                    )
+                    db.session.add(progress)
+        
+        print("📊 Created progress records")
+        
+        # Create some votes on wishlist songs
+        wishlist_songs = [s for s in songs if s.status == SongStatus.WISHLIST]
+        for song in wishlist_songs:
+            # Random voting pattern
+            for user in users:
+                if hash(f"{user.id}{song.id}") % 3 == 0:  # 1/3 chance to vote
+                    vote = Vote(
+                        user_id=user.id,
+                        song_id=song.id
+                    )
+                    db.session.add(vote)
+        
+        print("🗳️  Created vote records")
+        
+        # Commit everything
+        db.session.commit()
+        print("✅ Database seeded successfully!")
+        print(f"\n📋 Summary:")
+        print(f"   Band: {band.name}")
+        print(f"   Users: {len(users)}")
+        print(f"   Songs: {len(songs)} (Active: {len([s for s in songs if s.status == SongStatus.ACTIVE])}, Wishlist: {len([s for s in songs if s.status == SongStatus.WISHLIST])})")
+        print(f"\n🔑 Demo Login:")
+        print(f"   Use any of these emails with Google OAuth:")
+        for user in users:
+            print(f"   - {user.email} ({'Leader' if user.is_band_leader else 'Member'})")
+
+def reset_database():
+    """Reset the database (drop all tables and recreate)"""
+    app = create_app()
+    with app.app_context():
+        db.drop_all()
+        print("🗑️  Dropped all tables")
+        db.create_all()
+        print("✅ Recreated all tables")
+
+def show_status():
+    """Show current database status"""
+    app = create_app()
+    with app.app_context():
+        try:
+            band_count = Band.query.count()
+            user_count = User.query.count()
+            song_count = Song.query.count()
+            progress_count = SongProgress.query.count()
+            vote_count = Vote.query.count()
+            
+            print("📊 Database Status:")
+            print(f"   Bands: {band_count}")
+            print(f"   Users: {user_count}")
+            print(f"   Songs: {song_count}")
+            print(f"   Progress Records: {progress_count}")
+            print(f"   Votes: {vote_count}")
+            
+            if band_count > 0:
+                print(f"\n🎸 Band Details:")
+                for band in Band.query.all():
+                    print(f"   {band.name} (ID: {band.id})")
+                    print(f"     Members: {len(band.members)}")
+                    print(f"     Songs: {len(band.songs)}")
+                    
+        except Exception as e:
+            print(f"❌ Error checking status: {e}")
+
+def main():
+    """Main CLI interface"""
+    if len(sys.argv) < 2:
+        print("BandMate Management Script")
+        print("\nUsage:")
+        print("  python manage.py create-tables  - Create database tables")
+        print("  python manage.py seed           - Seed database with demo data")
+        print("  python manage.py reset          - Reset database (drop all tables)")
+        print("  python manage.py status         - Show database status")
+        return
+    
+    command = sys.argv[1]
+    
+    if command == "create-tables":
+        create_tables()
+    elif command == "seed":
+        seed_database()
+    elif command == "reset":
+        reset_database()
+    elif command == "status":
+        show_status()
+    else:
+        print(f"❌ Unknown command: {command}")
+        print("Use: create-tables, seed, reset, or status")
+
+if __name__ == "__main__":
+    main()

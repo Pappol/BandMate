@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Propose Song - BandMate{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Propose a New Song</h1>
+                <p class="text-gray-600">Suggest a song for your band to learn</p>
+            </div>
+            <a href="{{ url_for('main.wishlist') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+                Back to Wishlist
+            </a>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <form method="POST" class="space-y-6">
+            <div>
+                <label for="title" class="block text-sm font-medium text-gray-700">
+                    Song Title *
+                </label>
+                <input type="text" 
+                       name="title" 
+                       id="title" 
+                       required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                       placeholder="e.g., Bohemian Rhapsody">
+            </div>
+
+            <div>
+                <label for="artist" class="block text-sm font-medium text-gray-700">
+                    Artist/Band *
+                </label>
+                <input type="text" 
+                       name="artist" 
+                       id="artist" 
+                       required
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                       placeholder="e.g., Queen">
+            </div>
+
+            <div>
+                <label for="duration" class="block text-sm font-medium text-gray-700">
+                    Duration (minutes)
+                </label>
+                <input type="number" 
+                       name="duration" 
+                       id="duration" 
+                       min="1" 
+                       max="30"
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                       placeholder="e.g., 6">
+                <p class="mt-1 text-sm text-gray-500">Optional: How long is the song?</p>
+            </div>
+
+            <div>
+                <label for="link" class="block text-sm font-medium text-gray-700">
+                    Link (optional)
+                </label>
+                <input type="url" 
+                       name="link" 
+                       id="link" 
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                       placeholder="https://www.youtube.com/watch?v=...">
+                <p class="mt-1 text-sm text-gray-500">YouTube, Spotify, or other music platform link</p>
+            </div>
+
+            <div class="flex items-center justify-between pt-4">
+                <a href="{{ url_for('main.wishlist') }}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Propose Song
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tips -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-blue-800">Tips for proposing songs</h3>
+                <div class="mt-2 text-sm text-blue-700">
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Consider the skill level of your band members</li>
+                        <li>Think about the genre and style your band plays</li>
+                        <li>Include a link if possible so others can listen</li>
+                        <li>Be specific about the version or arrangement</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

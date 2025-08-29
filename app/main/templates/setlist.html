@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Setlist Generator - BandMate{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Setlist Generator</h1>
+                <p class="text-gray-600">Create optimized rehearsal setlists based on learning needs and maintenance</p>
+            </div>
+            <a href="{{ url_for('main.dashboard') }}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Generator Form -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <div x-data="setlistGenerator()" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="duration" class="block text-sm font-medium text-gray-700">
+                        Total Duration (minutes) *
+                    </label>
+                    <input type="number" 
+                           id="duration" 
+                           x-model="duration" 
+                           min="30" 
+                           max="300" 
+                           step="15"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                           placeholder="120">
+                    <p class="mt-1 text-sm text-gray-500">How long is your rehearsal session?</p>
+                </div>
+
+                <div>
+                    <label for="learning_ratio" class="block text-sm font-medium text-gray-700">
+                        Learning vs Maintenance Ratio
+                    </label>
+                    <div class="mt-1">
+                        <input type="range" 
+                               id="learning_ratio" 
+                               x-model="learningRatio" 
+                               min="0" 
+                               max="1" 
+                               step="0.1"
+                               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>All Maintenance</span>
+                            <span x-text="`${Math.round(learningRatio * 100)}% Learning`"></span>
+                            <span>All Learning</span>
+                        </div>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">Balance between new songs and practice</p>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button @click="generateSetlist()" 
+                        :disabled="generating"
+                        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg x-show="!generating" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <svg x-show="generating" class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span x-text="generating ? 'Generating...' : 'Generate Setlist'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div x-data="setlistGenerator()" x-show="setlist.length > 0" class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Generated Setlist</h3>
+        </div>
+        
+        <div class="p-6">
+            <!-- Summary -->
+            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                    <div>
+                        <div class="text-2xl font-bold text-gray-900" x-text="summary.total_duration"></div>
+                        <div class="text-sm text-gray-500">Total Minutes</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-blue-600" x-text="summary.learning_time"></div>
+                        <div class="text-sm text-gray-500">Learning Time</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-green-600" x-text="summary.maintenance_time"></div>
+                        <div class="text-sm text-gray-500">Maintenance Time</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-purple-600" x-text="`${Math.round(summary.learning_ratio * 100)}%`"></div>
+                        <div class="text-sm text-gray-500">Learning Ratio</div>
+                    </div>
+                </div>
+                
+                <!-- Break Info -->
+                <div x-show="summary.break_info" class="mt-4 text-center">
+                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <span x-text="summary.break_info.description"></span>
+                        <span x-text="` at ${summary.break_info.position}`"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Setlist -->
+            <div class="space-y-3">
+                <template x-for="(song, index) in setlist" :key="index">
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-sm font-medium text-gray-600" x-text="index + 1"></div>
+                            </div>
+                            <div>
+                                <div class="text-lg font-medium text-gray-900" x-text="song.title"></div>
+                                <div class="text-sm text-gray-500" x-text="song.artist"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <div class="text-right">
+                                <div class="text-sm font-medium text-gray-900" x-text="`${song.duration_minutes} min`"></div>
+                                <div class="text-xs text-gray-500" x-text="`Total: ${song.cumulative_time} min`"></div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-2">
+                                <span x-show="song.block === 'learning'" 
+                                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    Learning
+                                    <span class="ml-1" x-text="`(${song.readiness_score})`"></span>
+                                </span>
+                                <span x-show="song.block === 'maintenance'" 
+                                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Maintenance
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-6 flex justify-center space-x-4">
+                <button @click="printSetlist()" 
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    Print Setlist
+                </button>
+                <button @click="exportSetlist()" 
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Export PDF
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alpine.js Component -->
+<script>
+function setlistGenerator() {
+    return {
+        duration: 120,
+        learningRatio: 0.6,
+        generating: false,
+        setlist: [],
+        summary: {},
+        
+        generateSetlist() {
+            this.generating = true;
+            
+            fetch('/generate_setlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    duration_minutes_total: this.duration,
+                    learning_ratio: this.learningRatio
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showNotification(data.error, 'error');
+                } else {
+                    this.setlist = data.setlist;
+                    this.summary = data.summary;
+                    showNotification('Setlist generated successfully!', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to generate setlist', 'error');
+            })
+            .finally(() => {
+                this.generating = false;
+            });
+        },
+        
+        printSetlist() {
+            window.print();
+        },
+        
+        exportSetlist() {
+            // Simple export to JSON for now
+            const dataStr = JSON.stringify({
+                setlist: this.setlist,
+                summary: this.summary,
+                generated_at: new Date().toISOString()
+            }, null, 2);
+            
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `setlist-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+    }
+}
+</script>
+
+<!-- Custom styles for range slider -->
+<style>
+.slider::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #4f46e5;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #4f46e5;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}

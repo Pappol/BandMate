@@ -1,0 +1,123 @@
+{
+  "bands": [
+    {
+      "name": "The Demo Band",
+      "description": "A demo band for testing the BandMate application"
+    }
+  ],
+  "users": [
+    {
+      "name": "Alice Johnson",
+      "email": "alice@demo.com",
+      "is_band_leader": true,
+      "role": "Lead Guitarist"
+    },
+    {
+      "name": "Bob Smith",
+      "email": "bob@demo.com",
+      "is_band_leader": false,
+      "role": "Bassist"
+    },
+    {
+      "name": "Carla Rodriguez",
+      "email": "carla@demo.com",
+      "is_band_leader": false,
+      "role": "Drummer"
+    }
+  ],
+  "songs": [
+    {
+      "title": "Bohemian Rhapsody",
+      "artist": "Queen",
+      "status": "active",
+      "duration_minutes": 6,
+      "last_rehearsed_on": "2024-01-15",
+      "genre": "Rock",
+      "difficulty": "Advanced"
+    },
+    {
+      "title": "Hotel California",
+      "artist": "Eagles",
+      "status": "active",
+      "duration_minutes": 6,
+      "last_rehearsed_on": "2024-01-10",
+      "genre": "Rock",
+      "difficulty": "Intermediate"
+    },
+    {
+      "title": "Stairway to Heaven",
+      "artist": "Led Zeppelin",
+      "status": "active",
+      "duration_minutes": 8,
+      "last_rehearsed_on": "2024-01-05",
+      "genre": "Rock",
+      "difficulty": "Advanced"
+    },
+    {
+      "title": "Sweet Child O' Mine",
+      "artist": "Guns N' Roses",
+      "status": "active",
+      "duration_minutes": 5,
+      "last_rehearsed_on": "2024-01-20",
+      "genre": "Rock",
+      "difficulty": "Intermediate"
+    },
+    {
+      "title": "Wonderwall",
+      "artist": "Oasis",
+      "status": "active",
+      "duration_minutes": 4,
+      "last_rehearsed_on": "2024-01-25",
+      "genre": "Rock",
+      "difficulty": "Beginner"
+    },
+    {
+      "title": "Creep",
+      "artist": "Radiohead",
+      "status": "wishlist",
+      "duration_minutes": 4,
+      "genre": "Alternative",
+      "difficulty": "Intermediate"
+    },
+    {
+      "title": "Zombie",
+      "artist": "The Cranberries",
+      "status": "wishlist",
+      "duration_minutes": 5,
+      "genre": "Alternative",
+      "difficulty": "Intermediate"
+    },
+    {
+      "title": "Smells Like Teen Spirit",
+      "artist": "Nirvana",
+      "status": "wishlist",
+      "duration_minutes": 5,
+      "genre": "Grunge",
+      "difficulty": "Intermediate"
+    }
+  ],
+  "progress_patterns": [
+    {
+      "user_index": 0,
+      "pattern": "advanced",
+      "description": "Alice (leader) - generally more advanced progress"
+    },
+    {
+      "user_index": 1,
+      "pattern": "intermediate",
+      "description": "Bob - intermediate progress"
+    },
+    {
+      "user_index": 2,
+      "pattern": "beginner",
+      "description": "Carla - beginner progress"
+    }
+  ],
+  "notes": {
+    "setup": "This seed data creates a demo band with 3 members and 8 songs",
+    "active_songs": "5 songs are marked as active and ready for rehearsal",
+    "wishlist_songs": "3 songs are in the wishlist for voting and approval",
+    "progress_variation": "Each user has different progress levels to demonstrate the readiness scoring system",
+    "usage": "Use this data to test all features of the BandMate application"
+  }
+}
