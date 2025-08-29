@@ -327,6 +327,11 @@ def wishlist():
         flash('No band selected. Please select a band first.', 'warning')
         return redirect(url_for('main.select_band'))
     
+    current_band = Band.query.get(current_band_id)
+    if not current_band:
+        flash('Band not found.', 'error')
+        return redirect(url_for('main.select_band'))
+    
     wishlist_songs = Song.query.filter_by(
         band_id=current_band_id,
         status=SongStatus.WISHLIST
@@ -340,7 +345,7 @@ def wishlist():
             user_id=current_user.id
         ).first() is not None
     
-    return render_template('wishlist.html', songs=wishlist_songs)
+    return render_template('wishlist.html', songs=wishlist_songs, current_band=current_band)
 
 @main.route('/wishlist/propose', methods=['GET', 'POST'])
 @login_required

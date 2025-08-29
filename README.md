@@ -1,259 +1,154 @@
 # BandMate 🎸
 
-A web application for bands to manage their song repertoire, track member progress, and generate optimized setlists for rehearsals and performances.
+**BandMate** is a web application that eliminates the chaos before band rehearsals by providing a centralized dashboard for tracking song progress and generating optimized practice setlists.
 
-## Google OAuth Setup
+## 🎯 The Problem It Solves
 
-To enable Google authentication and fix the `redirect_uri_mismatch` error, follow these steps:
+**"Who knows what?"** - Stop endless WhatsApp messages asking "Have you practiced the new song?" The dashboard shows everyone's progress at a glance.
 
-### 1. Create Google Cloud Project
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select an existing one
-3. Enable the Google+ API and Google OAuth2 API
+**"What should we practice today?"** - Instead of wasting 20 minutes deciding, see which songs have the highest "readiness score" and focus on those.
 
-### 2. Configure OAuth Consent Screen
-1. Go to "APIs & Services" > "OAuth consent screen"
-2. Choose "External" user type
-3. Fill in the required fields:
-   - App name: "BandMate"
-   - User support email: your email
-   - Developer contact information: your email
-4. Add scopes: `userinfo.email`, `userinfo.profile`, `openid`
-5. Add test users (your email addresses)
+**"What's the next song?"** - Centralized management of new ideas. No more lost YouTube links or forgotten proposals in chat.
 
-### 3. Create OAuth 2.0 Credentials
-1. Go to "APIs & Services" > "Credentials"
-2. Click "Create Credentials" > "OAuth 2.0 Client IDs"
-3. Choose "Web application"
-4. Add authorized redirect URIs:
-   - For local development: `http://localhost:5001/login/google/authorized`
-   - For production: `https://yourdomain.com/login/google/authorized`
+## ✨ Key Features
 
-### 4. Configure Environment Variables
-1. Copy `env.example` to `.env`
-2. Update the following variables:
-   ```bash
-   GOOGLE_CLIENT_ID=your-actual-client-id.apps.googleusercontent.com
-   GOOGLE_CLIENT_SECRET=your-actual-client-secret
-   ```
+### 🎵 **Multi-Band Support**
+- Join multiple bands with different roles (Leader/Member)
+- Seamlessly switch between bands
+- Invitation system with secure codes
 
-**Important:** The redirect URI in your Google Cloud Console MUST exactly match `http://localhost:5001/login/google/authorized` for local development on port 5001.
+### 📊 **Smart Progress Tracking**
+- **Dashboard**: Visual progress table showing each member's status for every song
+- **Progress States**: 
+  - ⚪️ To Listen (not started)
+  - 🟡 In Practice (learning parts)
+  - 🟢 Ready for Rehearsal (can play with band)
+  - 🔵 Mastered (performance ready)
+- **Readiness Score**: Shows how many members are ready (e.g., "4/5 Ready")
 
-## Features
+### 🎼 **Advanced Setlist Generator**
+- **Intelligent Planning**: Balances learning new songs vs. maintaining mastered ones
+- **Customizable Buffers**: Configurable time buffers for new vs. learned songs
+- **Smart Scheduling**: Clusters time into 30-minute intervals
+- **Break Management**: Automatic breaks for sessions over 90 minutes
+- **Learning Ratio Control**: Adjust focus between new material and maintenance
 
-- **Song Dashboard**: Track all active songs and member progress
-- **Wishlist Management**: Propose new songs and vote on band additions
-- **Progress Tracking**: Monitor individual member readiness for each song
-- **Smart Setlist Generator**: Create optimized rehearsal setlists based on learning needs
-- **Google OAuth**: Secure authentication using Google accounts
-- **Responsive Design**: Mobile-first interface built with Tailwind CSS
+### 🎧 **Spotify Integration**
+- **Auto-complete**: Search songs and auto-fill metadata
+- **Rich Content**: Album artwork and track information
+- **Seamless Workflow**: Propose songs directly from Spotify search
 
-## Tech Stack
+### 🗳️ **Democratic Song Management**
+- **Wishlist System**: Propose new songs with voting
+- **Band Approval**: Leaders can promote songs from wishlist to active repertoire
+
+## 🏗️ Technical Stack
 
 - **Backend**: Python 3.11+, Flask
 - **Database**: SQLite with SQLAlchemy ORM
 - **Authentication**: Google OAuth via Flask-Dance
-- **Frontend**: Jinja2 templates + Alpine.js for interactivity
+- **Frontend**: Jinja2 templates + Alpine.js
 - **Styling**: Tailwind CSS
-- **Testing**: pytest with factory_boy
-- **Code Quality**: black, isort, flake8
+- **External APIs**: Spotify Web API
+- **Testing**: pytest with comprehensive test coverage
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
+- Python 3.11+
+- Google OAuth credentials
+- Spotify API credentials (optional)
 
-- Python 3.11 or higher
-- Google OAuth credentials (see [Authentication Setup](#authentication-setup))
+### Setup
+```bash
+# Clone and setup
+git clone <your-repo-url>
+cd bandmate
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 
-### Local Development
+# Environment configuration
+cp .env.example .env
+# Edit .env with your credentials
 
-1. **Clone and setup**
-   ```bash
-   git clone <your-repo-url>
-   cd bandmate
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+# Database setup
+export FLASK_APP=manage.py
+flask db upgrade
+python manage.py seed
 
-2. **Environment Configuration**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your Google OAuth credentials and other settings
-   ```
+# Run
+flask run
+```
 
-3. **Database Setup**
-   ```bash
-   export FLASK_APP=manage.py
-   export FLASK_ENV=development
-   flask db upgrade
-   python manage.py seed
-   ```
+## 🔧 Configuration
 
-4. **Run the Application**
-   ```bash
-   flask run
-   ```
-   
-   Open [http://localhost:5000](http://localhost:5000) in your browser.
+### Environment Variables
+```bash
+FLASK_SECRET_KEY=your-secret-key
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+SPOTIFY_CLIENT_ID=your-spotify-client-id
+SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
+```
 
-### Docker (Optional)
+### Setlist Generation Settings
+- **Buffer Percentages**: Customize time allocation for new vs. learned songs
+- **Break Management**: Configure break duration and thresholds
+- **Time Clustering**: Adjust session time intervals
 
+## 📱 Usage
+
+1. **Create/Join Band**: Start a new band or join existing ones
+2. **Add Songs**: Use Spotify search or manual entry
+3. **Track Progress**: Update your status for each song
+4. **Generate Setlists**: Create optimized practice schedules
+5. **Vote & Propose**: Contribute to the band's song selection
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=app
+
+# Run multi-band specific tests
+python run_multi_band_tests.py
+```
+
+## 🚀 Deployment
+
+### Render
+- Connect GitHub repository
+- Set environment variables
+- Build: `pip install -r requirements.txt`
+- Start: `gunicorn manage:app`
+
+### Docker
 ```bash
 docker-compose up --build
 ```
 
-## Authentication Setup
+## 📚 Documentation
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing one
-3. Enable Google+ API
-4. Go to Credentials → Create Credentials → OAuth 2.0 Client ID
-5. Set Application Type to "Web application"
-6. Add authorized redirect URIs:
-   - `http://localhost:5000/login/google/authorized` (development)
-   - `https://yourdomain.com/login/google/authorized` (production)
-7. Copy Client ID and Client Secret to your `.env` file
+- **API Reference**: See `/docs` folder
+- **Multi-Band Guide**: `MULTI_BAND_README.md`
+- **Spotify Integration**: `SPOTIFY_INTEGRATION_README.md`
+- **Setlist Algorithm**: Detailed in `DOCUMENTAZIONE.md`
 
-## Environment Variables
-
-Create a `.env` file based on `.env.example`:
-
-```bash
-FLASK_SECRET_KEY=your-secret-key-here
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-OAUTH_REDIRECT_URI=http://localhost:5000/login/google/authorized
-DATABASE_URL=sqlite:///bandmate.db
-FLASK_ENV=development
-```
-
-## API Endpoints
-
-### Main Routes
-- `GET /` - Home page (redirects to dashboard if authenticated)
-- `GET /dashboard` - Main dashboard with songs and progress
-- `GET /wishlist` - Song wishlist and voting
-- `GET /setlist` - Setlist generator interface
-
-### API Endpoints
-- `POST /progress` - Update song progress for current user
-- `POST /wishlist/propose` - Add new song proposal
-- `POST /wishlist/vote` - Toggle vote on song proposal
-- `POST /wishlist/approve` - Approve song proposal (band leader only)
-- `POST /generate_setlist` - Generate optimized setlist
-
-### Example API Usage
-
-```bash
-# Update song progress
-curl -X POST http://localhost:5000/progress \
-  -H "Content-Type: application/json" \
-  -d '{"song_id": 1, "status": "Ready for Rehearsal"}'
-
-# Generate setlist
-curl -X POST http://localhost:5000/generate_setlist \
-  -H "Content-Type: application/json" \
-  -d '{"duration_minutes_total": 120, "learning_ratio": 0.6}'
-```
-
-## Testing
-
-Run the test suite:
-
-```bash
-pytest
-```
-
-Run with coverage:
-
-```bash
-pytest --cov=app
-```
-
-## Database Migrations
-
-```bash
-# Create new migration
-flask db migrate -m "Description of changes"
-
-# Apply migrations
-flask db upgrade
-
-# Rollback migration
-flask db downgrade
-```
-
-## Seed Data
-
-The application comes with demo data including:
-- 1 Band: "The Demo Band"
-- 3 Users: Alice (leader), Bob, Carla
-- 8 Songs with varied progress states
-- Sample progress tracking and votes
-
-To reload seed data:
-
-```bash
-python manage.py seed
-```
-
-## Deployment
-
-### Render
-
-1. Connect your GitHub repository
-2. Set environment variables in Render dashboard
-3. Set build command: `pip install -r requirements.txt`
-4. Set start command: `gunicorn manage:app`
-
-### Fly.io
-
-1. Install flyctl: `curl -L https://fly.io/install.sh | sh`
-2. Login: `fly auth login`
-3. Deploy: `fly deploy`
-
-### Environment Variables for Production
-
-```bash
-FLASK_ENV=production
-FLASK_SECRET_KEY=<strong-random-secret>
-DATABASE_URL=<your-production-database-url>
-```
-
-## Project Structure
-
-```
-bandmate/
-├── app/                    # Main application package
-│   ├── __init__.py        # Flask app factory
-│   ├── models.py          # Database models
-│   ├── auth.py            # Authentication logic
-│   ├── main/              # Main routes and templates
-│   └── api/               # API endpoints
-├── migrations/             # Database migrations
-├── tests/                  # Test suite
-├── seed_data/             # Seed data and scripts
-├── requirements.txt        # Python dependencies
-├── manage.py              # CLI management script
-└── README.md              # This file
-```
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
+3. Make changes and add tests
+4. Submit a pull request
 
-## License
+## 📄 License
 
 MIT License - see LICENSE file for details.
 
-## Support
+---
 
-For issues and questions:
-- Create an issue in the GitHub repository
-- Check the documentation in the `/docs` folder
-- Review the test files for usage examples
+**BandMate** transforms band coordination from chaotic messaging to structured, productive practice sessions. 🎸✨

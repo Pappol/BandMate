@@ -2,7 +2,7 @@ from functools import wraps
 from flask import current_app, redirect, url_for, flash, session
 from flask_login import current_user, login_user, logout_user
 from flask_dance.contrib.google import google
-from app.models import User, Band, UserRole
+from app.models import User, Band, UserRole, band_membership
 from app import db
 
 def login_required(f):
@@ -64,7 +64,11 @@ def handle_google_login():
                 db.session.flush()  # Get the user ID
                 
                 # Add user to default band
-                role = UserRole.LEADER if len(default_band.members) == 0 else UserRole.MEMBER
+                # Check if band has any members using the new system
+                band_members = User.query.join(band_membership).filter(
+                    band_membership.c.band_id == default_band.id
+                ).all()
+                role = UserRole.LEADER if len(band_members) == 0 else UserRole.MEMBER
                 default_band.add_member(user, role)
                 
                 # Set current band in session

@@ -121,7 +121,7 @@
                         </div>
                         
                         <!-- Approve Button (Band Leader Only) -->
-                        {% if current_user.is_band_leader %}
+                        {% if current_user.is_leader_of(current_band.id) %}
                         <div x-data="{ 
                             approving: false,
                             approveSong() {

@@ -2,7 +2,7 @@ from flask import jsonify, request, session
 from flask_login import current_user, login_required
 from app.api import api
 from app.auth import band_leader_required
-from app.models import Song, SongProgress, Vote, SongStatus, ProgressStatus, Band
+from app.models import Song, SongProgress, Vote, SongStatus, ProgressStatus, Band, band_membership, User
 from app import db
 from datetime import datetime
 
@@ -162,7 +162,11 @@ def approve_song():
         
         # Create progress records for all band members
         current_band = Band.query.get(current_band_id)
-        for member in current_band.members:
+        band_members = User.query.join(band_membership).filter(
+            band_membership.c.band_id == current_band_id
+        ).all()
+        
+        for member in band_members:
             progress = SongProgress(
                 user_id=member.id,
                 song_id=song_id,
