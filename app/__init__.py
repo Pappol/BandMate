@@ -50,22 +50,31 @@ def create_app(config_name=None):
         app.config['GOOGLE_OAUTH_CLIENT_SECRET'] and 
         app.config['GOOGLE_OAUTH_CLIENT_SECRET'] != 'your-google-client-secret'):
         
+        # Register main blueprint FIRST (so our custom routes take precedence)
+        from app.main import main as main_blueprint
+        app.register_blueprint(main_blueprint)
+        
+        from app.api import api as api_blueprint
+        app.register_blueprint(api_blueprint, url_prefix='/api')
+        
+        # Then register Google OAuth blueprint
         google_bp = make_google_blueprint(
             client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
             client_secret=app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
-            scope=['openid', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email']
+            scope=['openid', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
+            redirect_to='main.handle_oauth_callback'
         )
         app.register_blueprint(google_bp, url_prefix='/login')
         print("✅ Google OAuth blueprint registered")
     else:
         print("⚠️  Google OAuth credentials not configured - OAuth login will not work")
-    
-    # Register blueprints
-    from app.main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
-    
-    from app.api import api as api_blueprint
-    app.register_blueprint(api_blueprint, url_prefix='/api')
+        
+        # Register blueprints even without OAuth
+        from app.main import main as main_blueprint
+        app.register_blueprint(main_blueprint)
+        
+        from app.api import api as api_blueprint
+        app.register_blueprint(api_blueprint, url_prefix='/api')
     
     # Import models to ensure they are registered with SQLAlchemy
     from app import models
