@@ -2,6 +2,43 @@
 
 A web application for bands to manage their song repertoire, track member progress, and generate optimized setlists for rehearsals and performances.
 
+## Google OAuth Setup
+
+To enable Google authentication and fix the `redirect_uri_mismatch` error, follow these steps:
+
+### 1. Create Google Cloud Project
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google+ API and Google OAuth2 API
+
+### 2. Configure OAuth Consent Screen
+1. Go to "APIs & Services" > "OAuth consent screen"
+2. Choose "External" user type
+3. Fill in the required fields:
+   - App name: "BandMate"
+   - User support email: your email
+   - Developer contact information: your email
+4. Add scopes: `userinfo.email`, `userinfo.profile`, `openid`
+5. Add test users (your email addresses)
+
+### 3. Create OAuth 2.0 Credentials
+1. Go to "APIs & Services" > "Credentials"
+2. Click "Create Credentials" > "OAuth 2.0 Client IDs"
+3. Choose "Web application"
+4. Add authorized redirect URIs:
+   - For local development: `http://localhost:5001/login/google/authorized`
+   - For production: `https://yourdomain.com/login/google/authorized`
+
+### 4. Configure Environment Variables
+1. Copy `env.example` to `.env`
+2. Update the following variables:
+   ```bash
+   GOOGLE_CLIENT_ID=your-actual-client-id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your-actual-client-secret
+   ```
+
+**Important:** The redirect URI in your Google Cloud Console MUST exactly match `http://localhost:5001/login/google/authorized` for local development on port 5001.
+
 ## Features
 
 - **Song Dashboard**: Track all active songs and member progress

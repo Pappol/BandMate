@@ -140,80 +140,92 @@
                         {% for member in members %}
                         <td class="px-6 py-4 whitespace-nowrap">
                             {% set progress = song_progress[song.id][member.id] %}
-                            <div x-data="{ 
-                                status: '{{ progress.status.value if progress else 'To Listen' }}',
-                                open: false,
-                                updateProgress(newStatus) {
-                                    this.status = newStatus;
-                                    fetch('/api/progress', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                            song_id: {{ song.id }},
-                                            status: newStatus
+                            {% if member.id == current_user.id %}
+                                <!-- Interactive dropdown for current user -->
+                                <div x-data="{ 
+                                    status: '{{ progress.status.value if progress else 'To Listen' }}',
+                                    open: false,
+                                    updateProgress(newStatus) {
+                                        this.status = newStatus;
+                                        fetch('/api/progress', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                song_id: {{ song.id }},
+                                                status: newStatus
+                                            })
                                         })
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            showNotification(data.message, 'success');
-                                            // Refresh page to update readiness scores
-                                            setTimeout(() => location.reload(), 1000);
-                                        } else {
-                                            showNotification(data.error || 'Update failed', 'error');
-                                        }
-                                    })
-                                    .catch(error => {
-                                        console.error('Error:', error);
-                                        showNotification('Update failed', 'error');
-                                    });
-                                    this.open = false;
-                                }
-                            }">
-                                <div class="relative">
-                                    <button @click="open = !open" 
-                                            class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md 
-                                                   {% if progress and progress.status.value == 'Mastered' %}bg-green-100 text-green-800
-                                                   {% elif progress and progress.status.value == 'Ready for Rehearsal' %}bg-blue-100 text-blue-800
-                                                   {% elif progress and progress.status.value == 'In Practice' %}bg-yellow-100 text-yellow-800
-                                                   {% else %}bg-gray-100 text-gray-800{% endif %}
-                                                   hover:bg-opacity-75 transition-colors duration-200">
-                                        <span x-text="status"></span>
-                                        <svg class="ml-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                        </svg>
-                                    </button>
-                                    
-                                    <div x-show="open" 
-                                         @click.away="open = false"
-                                         x-transition:enter="transition ease-out duration-100"
-                                         x-transition:enter-start="transform opacity-0 scale-95"
-                                         x-transition:enter-end="transform opacity-100 scale-100"
-                                         x-transition:leave="transition ease-in duration-75"
-                                         x-transition:leave-start="transform opacity-100 scale-100"
-                                         x-transition:leave-end="transform opacity-0 scale-95"
-                                         class="absolute z-10 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                                        <div class="py-1">
-                                            <button @click="updateProgress('To Listen')" 
-                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                To Listen
-                                            </button>
-                                            <button @click="updateProgress('In Practice')" 
-                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                In Practice
-                                            </button>
-                                            <button @click="updateProgress('Ready for Rehearsal')" 
-                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                Ready for Rehearsal
-                                            </button>
-                                            <button @click="updateProgress('Mastered')" 
-                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                Mastered
-                                            </button>
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                showNotification(data.message, 'success');
+                                                // Refresh page to update readiness scores
+                                                setTimeout(() => location.reload(), 1000);
+                                            } else {
+                                                showNotification(data.error || 'Update failed', 'error');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error('Error:', error);
+                                            showNotification('Update failed', 'error');
+                                        });
+                                        this.open = false;
+                                    }
+                                }">
+                                    <div class="relative">
+                                        <button @click="open = !open" 
+                                                class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md 
+                                                       {% if progress and progress.status.value == 'Mastered' %}bg-green-100 text-green-800
+                                                       {% elif progress and progress.status.value == 'Ready for Rehearsal' %}bg-blue-100 text-blue-800
+                                                       {% elif progress and progress.status.value == 'In Practice' %}bg-yellow-100 text-yellow-800
+                                                       {% else %}bg-gray-100 text-gray-800{% endif %}
+                                                       hover:bg-opacity-75 transition-colors duration-200">
+                                            <span x-text="status"></span>
+                                            <svg class="ml-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </button>
+                                        
+                                        <div x-show="open" 
+                                             @click.away="open = false"
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="transform opacity-0 scale-95"
+                                             x-transition:enter-end="transform opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="transform opacity-100 scale-100"
+                                             x-transition:leave-end="transform opacity-0 scale-95"
+                                             class="absolute z-10 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                                            <div class="py-1">
+                                                <button @click="updateProgress('To Listen')" 
+                                                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                    To Listen
+                                                </button>
+                                                <button @click="updateProgress('In Practice')" 
+                                                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                    In Practice
+                                                </button>
+                                                <button @click="updateProgress('Ready for Rehearsal')" 
+                                                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                    Ready for Rehearsal
+                                                </button>
+                                                <button @click="updateProgress('Mastered')" 
+                                                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                    Mastered
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            {% else %}
+                                <!-- Static badge for other members -->
+                                <span class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md 
+                                           {% if progress and progress.status.value == 'Mastered' %}bg-green-100 text-green-800
+                                           {% elif progress and progress.status.value == 'Ready for Rehearsal' %}bg-blue-100 text-blue-800
+                                           {% elif progress and progress.status.value == 'In Practice' %}bg-yellow-100 text-yellow-800
+                                           {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ progress.status.value if progress else 'To Listen' }}
+                                </span>
+                            {% endif %}
                         </td>
                         {% endfor %}
                         
