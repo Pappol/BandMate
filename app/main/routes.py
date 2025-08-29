@@ -15,6 +15,11 @@ def index():
         return redirect(url_for('main.dashboard'))
     return render_template('landing.html', config=current_app.config)
 
+@main.route('/color-test')
+def color_test():
+    """Test page to showcase the new color palette"""
+    return render_template('color_test.html')
+
 @main.route('/login')
 def login():
     """Login page with Google OAuth button"""

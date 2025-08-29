@@ -6,13 +6,13 @@
 <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
-            <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-indigo-100">
-                <span class="text-2xl">🎸</span>
+            <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-primary-light">
+                <img src="{{ url_for('static', filename='BandMateLogo.png') }}" alt="BandMate Logo" class="h-8 w-8">
             </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-neutral-900">
                 Welcome to BandMate
             </h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
+            <p class="mt-2 text-center text-sm text-neutral-600">
                 Manage your band's song repertoire and generate optimized setlists
             </p>
         </div>
@@ -22,7 +22,7 @@
             {% if config.GOOGLE_OAUTH_CLIENT_ID and config.GOOGLE_OAUTH_CLIENT_ID != 'your-google-client-id.apps.googleusercontent.com' %}
             <div>
                 <a href="{{ url_for('google.login') }}" 
-                   class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200">
+                   class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200">
                     <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -52,18 +52,18 @@
             {% endif %}
             
             <!-- Invitation Code Section -->
-            <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
-                <h3 class="text-sm font-medium text-blue-800 mb-2">Have an invitation code?</h3>
+            <div class="bg-complementary-light border border-complementary rounded-md p-4">
+                <h3 class="text-sm font-medium text-complementary-dark mb-2">Have an invitation code?</h3>
                 <form method="GET" action="#" class="flex space-x-2" onsubmit="joinWithCode(event)">
                     <input type="text" id="invitationCode" name="code" placeholder="Enter invitation code" 
-                           class="flex-1 border border-blue-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           class="flex-1 border border-complementary rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-complementary focus:border-complementary"
                            pattern="[A-Z0-9]{8}" title="8-character invitation code" required>
                     <button type="submit" 
-                            class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            class="bg-complementary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-complementary-dark focus:outline-none focus:ring-2 focus:ring-complementary">
                         Join Band
                     </button>
                 </form>
-                <p class="text-xs text-blue-600 mt-2">Enter the 8-character code you received from your band leader</p>
+                <p class="text-xs text-complementary-dark mt-2">Enter the 8-character code you received from your band leader</p>
             </div>
 
             <!-- Demo Login Section -->
@@ -72,21 +72,21 @@
                     <div class="w-full border-t border-gray-300" />
                 </div>
                 <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-gray-50 text-gray-500">Try the demo</span>
+                    <span class="px-2 bg-neutral-50 text-neutral-500">Try the demo</span>
                 </div>
             </div>
             
             <div class="grid grid-cols-1 gap-3">
                 <a href="{{ url_for('main.demo_login', email='alice@demo.com') }}" 
-                   class="w-full flex justify-center py-3 px-4 border-2 border-blue-500 rounded-md shadow-lg text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 cursor-pointer relative z-10">
+                   class="w-full flex justify-center py-3 px-4 border-2 border-primary rounded-md shadow-lg text-sm font-medium text-primary-dark bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 cursor-pointer relative z-10">
                     🎯 Demo as Alice (Band Leader)
                 </a>
                 <a href="{{ url_for('main.demo_login', email='bob@demo.com') }}" 
-                   class="w-full flex justify-center py-3 px-4 border-2 border-green-500 rounded-md shadow-lg text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 cursor-pointer relative z-10">
+                   class="w-full flex justify-center py-3 px-4 border-2 border-complementary rounded-md shadow-lg text-sm font-medium text-complementary-dark bg-white hover:bg-complementary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-complementary transition-colors duration-200 cursor-pointer relative z-10">
                     🎸 Demo as Bob (Member)
                 </a>
                 <a href="{{ url_for('main.demo_login', email='carla@demo.com') }}" 
-                   class="w-full flex justify-center py-3 px-4 border-2 border-purple-500 rounded-md shadow-lg text-sm font-medium text-purple-700 bg-purple-50 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 cursor-pointer relative z-10">
+                   class="w-full flex justify-center py-3 px-4 border-2 border-primary rounded-md shadow-lg text-sm font-medium text-primary-dark bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 cursor-pointer relative z-10">
                     🎤 Demo as Carla (Member)
                 </a>
             </div>
