@@ -62,9 +62,9 @@ def create_app(config_name=None):
             client_id=app.config['GOOGLE_OAUTH_CLIENT_ID'],
             client_secret=app.config['GOOGLE_OAUTH_CLIENT_SECRET'],
             scope=['openid', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
-            redirect_to='main.handle_oauth_callback'
+            redirect_to='main.google_authorized'
         )
-        app.register_blueprint(google_bp, url_prefix='/login')
+        app.register_blueprint(google_bp, url_prefix='/oauth')
         print("✅ Google OAuth blueprint registered")
     else:
         print("⚠️  Google OAuth credentials not configured - OAuth login will not work")

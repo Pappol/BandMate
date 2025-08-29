@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, jsonify, current_app
+from flask import render_template, redirect, url_for, flash, request, jsonify, current_app, session
 from flask_login import current_user, login_user, logout_user
 from flask_dance.contrib.google import google
 from app.main import main
@@ -38,7 +38,15 @@ def demo_login(email):
 @main.route('/login/google')
 def google_login():
     """Initiate Google OAuth login"""
-    return handle_google_login()
+    try:
+        if not google.authorized:
+            return redirect(url_for('google.login'))
+        return handle_google_login()
+    except Exception as e:
+        # OAuth not configured or error occurred
+        current_app.logger.error(f"Google OAuth error: {e}")
+        flash('Google OAuth is not configured. Please use demo login instead.', 'warning')
+        return redirect(url_for('main.login'))
 
 @main.route('/login/google/authorized')
 def google_authorized():
@@ -424,3 +432,117 @@ def generate_setlist():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@main.route('/start-fresh')
+@login_required
+def start_fresh():
+    """Start fresh page - allows users to leave current band and start over"""
+    return render_template('start_fresh.html')
+
+@main.route('/create-new-band', methods=['POST'])
+@login_required
+def create_new_band():
+    """Create a new band and leave the current one"""
+    band_name = request.form.get('band_name')
+    if not band_name:
+        flash('Band name is required.', 'error')
+        return redirect(url_for('main.start_fresh'))
+    
+    try:
+        # Leave current band
+        if current_user.band:
+            # Remove user from current band
+            current_user.band_id = None
+            db.session.commit()
+        
+        # Create new band
+        new_band = Band(
+            name=band_name,
+            created_by=current_user.id
+        )
+        db.session.add(new_band)
+        db.session.flush()  # Get the ID
+        
+        # Add user to new band as leader
+        current_user.band_id = new_band.id
+        current_user.is_band_leader = True
+        
+        db.session.commit()
+        
+        flash(f'Successfully created new band "{band_name}"!', 'success')
+        return redirect(url_for('main.dashboard'))
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error creating new band: {e}")
+        flash('Failed to create new band. Please try again.', 'error')
+        return redirect(url_for('main.start_fresh'))
+
+@main.route('/join-different-band', methods=['POST'])
+@login_required
+def join_different_band():
+    """Join a different band using invitation code"""
+    invitation_code = request.form.get('invitation_code')
+    if not invitation_code:
+        flash('Invitation code is required.', 'error')
+        return redirect(url_for('main.start_fresh'))
+    
+    try:
+        # Find band by invitation code
+        band = Band.query.filter_by(invitation_code=invitation_code).first()
+        if not band:
+            flash('Invalid invitation code. Please check and try again.', 'error')
+            return redirect(url_for('main.start_fresh'))
+        
+        # Leave current band
+        if current_user.band:
+            current_user.band_id = None
+            db.session.commit()
+        
+        # Join new band
+        current_user.band_id = band.id
+        current_user.is_band_leader = False  # Reset band leader status
+        
+        db.session.commit()
+        
+        flash(f'Successfully joined "{band.name}"!', 'success')
+        return redirect(url_for('main.dashboard'))
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error joining band: {e}")
+        flash('Failed to join band. Please try again.', 'error')
+        return redirect(url_for('main.start_fresh'))
+
+@main.route('/handle-oauth-callback')
+def handle_oauth_callback():
+    """Handle OAuth callback from Flask-Dance"""
+    if not google.authorized:
+        flash('Google OAuth failed. Please try again.', 'error')
+        return redirect(url_for('main.login'))
+    
+    try:
+        resp = google.get('/oauth2/v2/userinfo')
+        if resp.ok:
+            google_user_info = resp.json()
+            
+            # Check if user exists
+            user = User.query.filter_by(email=google_user_info['email']).first()
+            
+            if not user:
+                # New user - redirect to onboarding
+                session['google_user_info'] = google_user_info
+                return redirect(url_for('main.onboarding'))
+            
+            # Existing user - log them in
+            login_user(user)
+            flash(f'Welcome back, {user.name}!', 'success')
+            return redirect(url_for('main.dashboard'))
+            
+    except Exception as e:
+        current_app.logger.error(f"Google OAuth error: {e}")
+        flash('Authentication failed. Please try again.', 'error')
+        return redirect(url_for('main.login'))
+    
+    flash('Authentication failed. Please try again.', 'error')
+    return redirect(url_for('main.login'))

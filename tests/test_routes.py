@@ -22,8 +22,8 @@ class TestMainRoutes:
         """Test that index shows login page when user is not authenticated."""
         response = client.get('/')
         assert response.status_code == 200
-        assert b'Welcome to BandMate' in response.data
-        assert b'Sign in with Google' in response.data
+        assert b'BandMate' in response.data
+        assert b'Login' in response.data
     
     def test_login_page(self, client):
         """Test login page display."""

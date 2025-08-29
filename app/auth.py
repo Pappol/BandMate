@@ -32,9 +32,6 @@ def band_leader_required(f):
 
 def handle_google_login():
     """Handle Google OAuth login and user creation"""
-    if not google.authorized:
-        return redirect(url_for('google.login'))
-    
     try:
         resp = google.get('/oauth2/v2/userinfo')
         if resp.ok:

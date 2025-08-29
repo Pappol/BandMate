@@ -11,12 +11,21 @@ def app():
     # Create a temporary file to isolate the database for each test
     db_fd, db_path = tempfile.mkstemp()
     
+    # Set test environment variables before creating app
+    os.environ['FLASK_ENV'] = 'testing'
+    os.environ['FLASK_SECRET_KEY'] = 'test-secret-key'
+    os.environ['DATABASE_URL'] = f'sqlite:///{db_path}'
+    os.environ['GOOGLE_CLIENT_ID'] = 'test-client-id'
+    os.environ['GOOGLE_CLIENT_SECRET'] = 'test-client-secret'
+    
     app = create_app()
     app.config.update({
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
         'WTF_CSRF_ENABLED': False,
-        'FLASK_SECRET_KEY': 'test-secret-key'
+        'FLASK_SECRET_KEY': 'test-secret-key',
+        'GOOGLE_OAUTH_CLIENT_ID': 'test-client-id',
+        'GOOGLE_OAUTH_CLIENT_SECRET': 'test-client-secret'
     })
     
     # Create the database and load test data
