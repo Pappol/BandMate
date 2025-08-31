@@ -27,8 +27,9 @@
                 <!-- Single Band - Management -->
                 <div class="max-w-md mx-auto mb-12">
                     <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
-                        <div class="w-16 h-16 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center">
-                            <i class="fas fa-music text-white text-2xl"></i>
+                        <div class="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center text-2xl font-bold"
+                             style="background-color: {{ bands[0].band.get_display_color() }}; color: {{ bands[0].band.get_style_attributes().color }}">
+                            {{ bands[0].band.get_display_identifier() }}
                         </div>
                         <h3 class="text-2xl font-bold text-neutral-800 mb-4">{{ bands[0].band.name }}</h3>
                         <div class="mb-6">
@@ -68,15 +69,16 @@
                             <div class="p-8">
                                 <!-- Band Header -->
                                 <div class="flex items-center justify-between mb-6">
-                                    <div class="flex items-center">
-                                        <div class="w-12 h-12 rounded-xl flex items-center justify-center mr-4" style="background: linear-gradient(135deg, #e27551, #e2a551);">
-                                            <i class="fas fa-music text-white text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="text-2xl font-bold text-neutral-800">{{ band_data.band.name }}</h3>
-                                            <p class="text-neutral-500">Band</p>
-                                        </div>
+                                                                    <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center mr-4 text-xl font-bold"
+                                         style="background-color: {{ band_data.band.get_display_color() }}; color: {{ band_data.band.get_style_attributes().color }}">
+                                        {{ band_data.band.get_display_identifier() }}
                                     </div>
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-neutral-800">{{ band_data.band.name }}</h3>
+                                        <p class="text-neutral-500">Band</p>
+                                    </div>
+                                </div>
                                     {% if current_user.is_leader_of(band_data.band.id) %}
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-white" style="background: linear-gradient(135deg, #f59e0b, #e2a551);">
                                             <i class="fas fa-crown mr-1"></i> Leader

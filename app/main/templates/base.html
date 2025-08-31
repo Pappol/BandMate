@@ -232,6 +232,7 @@
                                 class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
                             <i class="fas fa-users mr-2"></i>
                             {% if current_band %}
+                                <span class="mr-2">{{ current_band.get_display_identifier() }}</span>
                                 {{ current_band.name }}
                             {% else %}
                                 Select Band
@@ -253,7 +254,13 @@
                                  <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
                                     class="nav-item block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors {% if current_band and current_band.id == band.id %}bg-primary-light text-white{% endif %}">
                                     <div class="flex items-center justify-between">
-                                        <span class="font-medium">{{ band.name }}</span>
+                                        <div class="flex items-center">
+                                            <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-2"
+                                                  style="background-color: {{ band.get_display_color() }}; color: {{ band.get_style_attributes().color }}">
+                                                {{ band.get_display_identifier() }}
+                                            </span>
+                                            <span class="font-medium">{{ band.name }}</span>
+                                        </div>
                                         {% if current_user.is_leader_of(band.id) %}
                                             <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
                                         {% endif %}
@@ -341,10 +348,13 @@
                     <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
                        class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                         <div class="flex items-center justify-between">
-                            <span class="font-medium">
-                                <i class="fas fa-users mr-3"></i>
-                                {{ band.name }}
-                            </span>
+                            <div class="flex items-center">
+                                <span class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3"
+                                      style="background-color: {{ band.get_display_color() }}; color: {{ band.get_style_attributes().color }}">
+                                    {{ band.get_display_identifier() }}
+                                </span>
+                                <span class="font-medium">{{ band.name }}</span>
+                            </div>
                             {% if current_user.is_leader_of(band.id) %}
                                 <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
                             {% endif %}

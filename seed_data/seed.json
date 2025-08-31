@@ -2,7 +2,10 @@
   "bands": [
     {
       "name": "The Demo Band",
-      "description": "A demo band for testing the BandMate application"
+      "description": "A demo band for testing the BandMate application",
+      "emoji": "🎸",
+      "color": "#FF6B6B",
+      "letter": "D"
     }
   ],
   "users": [
