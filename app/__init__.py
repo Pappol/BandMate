@@ -30,7 +30,7 @@ def create_app(config_name=None):
     # Configuration
     app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL',
-                                                      'sqlite:///bandmate.db')
+                                                      'sqlite:///instance/bandmate.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # Google OAuth configuration
@@ -87,7 +87,7 @@ def create_app(config_name=None):
     @login_manager.user_loader
     def load_user(user_id):
         from app.models import User
-        return User.query.get(user_id)
+        return db.session.get(User, user_id)
 
     # Context processor to make current band available in all templates
     @app.context_processor
@@ -98,7 +98,7 @@ def create_app(config_name=None):
         current_band = None
 
         if 'current_band_id' in session:
-            current_band = Band.query.get(session['current_band_id'])
+            current_band = db.session.get(Band, session['current_band_id'])
 
         return dict(current_band=current_band)
 

@@ -327,7 +327,7 @@ def wishlist():
         flash('No band selected. Please select a band first.', 'warning')
         return redirect(url_for('main.select_band'))
     
-    current_band = Band.query.get(current_band_id)
+    current_band = db.session.get(Band, current_band_id)
     if not current_band:
         flash('Band not found.', 'error')
         return redirect(url_for('main.select_band'))
@@ -434,7 +434,7 @@ def generate_setlist():
         if not current_band_id:
             return jsonify({'error': 'No band selected'}), 400
         
-        current_band = Band.query.get(current_band_id)
+        current_band = db.session.get(Band, current_band_id)
         if not current_band:
             return jsonify({'error': 'Band not found'}), 400
         
@@ -453,7 +453,7 @@ def generate_setlist():
         if not current_band_id:
             return jsonify({'error': 'No band selected'}), 400
         
-        current_band = Band.query.get(current_band_id)
+        current_band = db.session.get(Band, current_band_id)
         if not current_band:
             return jsonify({'error': 'Band not found'}), 400
         
@@ -598,7 +598,7 @@ def create_new_band_legacy():
         # Leave current band (remove from all bands)
         current_band_id = session.get('current_band_id')
         if current_band_id:
-            current_band = Band.query.get(current_band_id)
+            current_band = db.session.get(Band, current_band_id)
             if current_band:
                 current_band.remove_member(current_user.id)
         
@@ -641,12 +641,12 @@ def join_different_band():
         # Leave current band (remove from all bands)
         current_band_id = session.get('current_band_id')
         if current_band_id:
-            current_band = Band.query.get(current_band_id)
+            current_band = db.session.get(Band, current_band_id)
             if current_band:
                 current_band.remove_member(current_user.id)
         
         # Join new band
-        band = Band.query.get(invitation.band_id)
+        band = db.session.get(Band, invitation.band_id)
         band.add_member(current_user, UserRole.MEMBER)
         
         # Mark invitation as accepted
@@ -713,7 +713,7 @@ def band_management():
         flash('No band selected. Please select a band first.', 'warning')
         return redirect(url_for('main.select_band'))
     
-    current_band = Band.query.get(current_band_id)
+    current_band = db.session.get(Band, current_band_id)
     if not current_band:
         flash('Band not found.', 'error')
         return redirect(url_for('main.select_band'))
@@ -950,7 +950,7 @@ def setlist_config():
         flash('No band selected. Please select a band first.', 'warning')
         return redirect(url_for('main.select_band'))
     
-    current_band = Band.query.get(current_band_id)
+    current_band = db.session.get(Band, current_band_id)
     if not current_band:
         flash('Band not found.', 'error')
         return redirect(url_for('main.select_band'))
@@ -967,7 +967,7 @@ def get_setlist_config():
     if not current_band_id:
         return jsonify({'error': 'No band selected'}), 400
     
-    current_band = Band.query.get(current_band_id)
+    current_band = db.session.get(Band, current_band_id)
     if not current_band:
         return jsonify({'error': 'Band not found'}), 400
     
@@ -992,7 +992,7 @@ def update_setlist_config():
         if not current_band_id:
             return jsonify({'error': 'No band selected'}), 400
         
-        current_band = Band.query.get(current_band_id)
+        current_band = db.session.get(Band, current_band_id)
         if not current_band:
             return jsonify({'error': 'Band not found'}), 400
         
@@ -1050,15 +1050,15 @@ def switch_band(band_id):
     
     # Update session with new band
     session['current_band_id'] = band_id
-    flash(f'Switched to band: {Band.query.get(band_id).name}', 'success')
+    flash(f'Switched to band: {db.session.get(Band, band_id).name}', 'success')
     
-    # Redirect back to the page they were on, or dashboard
-    return redirect(request.referrer or url_for('main.dashboard'))
+    # Redirect directly to dashboard
+    return redirect(url_for('main.dashboard'))
 
 @main.route('/band/select')
 @login_required
 def select_band():
-    """Show band selection page for users with multiple bands"""
+    """Show band management page for all users"""
     user_bands = current_user.bands
     
     if not user_bands:
@@ -1066,14 +1066,19 @@ def select_band():
         flash('You are not a member of any bands. Create a new band or join an existing one.', 'info')
         return render_template('select_band.html', bands=[])
     
-    if len(user_bands) == 1:
-        # User has only one band - set it as current and redirect to dashboard
-        session['current_band_id'] = user_bands[0].id
-        flash(f'Welcome to {user_bands[0].name}!', 'success')
-        return redirect(url_for('main.dashboard'))
+    # Always show the band management page, regardless of number of bands
+    bands_with_stats = []
+    for band in user_bands:
+        # Get band statistics
+        song_count = len(band.songs)
+        member_count = len(band.members)
+        bands_with_stats.append({
+            'band': band,
+            'song_count': song_count,
+            'member_count': member_count
+        })
     
-    # User has multiple bands - show selection page
-    return render_template('select_band.html', bands=user_bands)
+    return render_template('select_band.html', bands=bands_with_stats)
 
 @main.route('/band/create', methods=['GET', 'POST'])
 @login_required
@@ -1116,14 +1121,14 @@ def join_band():
         invitation_code = request.form.get('invitation_code')
         if not invitation_code:
             flash('Invitation code is required.', 'error')
-            return redirect(url_for('main.join_band'))
+            return render_template('join_band.html')
         
         # Find invitation
         invitation = Invitation.query.filter_by(code=invitation_code).first()
         
         if not invitation or not invitation.is_valid:
             flash('Invalid or expired invitation code.', 'error')
-            return redirect(url_for('main.join_band'))
+            return render_template('join_band.html')
         
         # Check if user is already a member
         if current_user.is_member_of(invitation.band_id):
@@ -1132,7 +1137,7 @@ def join_band():
         
         try:
             # Add user to band
-            band = Band.query.get(invitation.band_id)
+            band = db.session.get(Band, invitation.band_id)
             band.add_member(current_user, UserRole.MEMBER)
             
             # Mark invitation as accepted

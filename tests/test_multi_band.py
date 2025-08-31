@@ -481,7 +481,7 @@ class TestInvitationSystem:
             
             # Verify invitation belongs to correct band
             assert invitation.band_id == band1.id
-            assert invitation.band == band1
+            assert invitation.band.id == band1.id
     
     def test_band_leader_permissions(self, app, sample_bands, sample_users):
         """Test that band leaders can manage their bands."""

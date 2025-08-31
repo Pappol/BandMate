@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Select Band - BandMate{% endblock %}
+{% block title %}Band Management - BandMate{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 py-8">
@@ -10,12 +10,12 @@
             <div class="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-full mb-6">
                 <i class="fas fa-users text-white text-3xl"></i>
             </div>
-            <h1 class="text-4xl font-bold text-neutral-800 mb-4">Select Your Band</h1>
+            <h1 class="text-4xl font-bold text-neutral-800 mb-4">Band Management</h1>
             <p class="text-xl text-neutral-600 max-w-2xl mx-auto">
                 {% if bands and bands|length > 1 %}
-                    You're a member of multiple bands. Choose which one you'd like to work with:
+                    You're a member of multiple bands. Choose which one you'd like to work with or manage your bands:
                 {% elif bands and bands|length == 1 %}
-                    You're a member of one band. Redirecting you to the dashboard...
+                    You're a member of one band. You can switch to it or manage your band settings:
                 {% else %}
                     You are not a member of any bands. Create a new band or join an existing one.
                 {% endif %}
@@ -24,15 +24,15 @@
 
         {% if bands %}
             {% if bands|length == 1 %}
-                <!-- Single Band - Auto Redirect -->
-                <div class="max-w-md mx-auto">
+                <!-- Single Band - Management -->
+                <div class="max-w-md mx-auto mb-12">
                     <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
                         <div class="w-16 h-16 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center">
                             <i class="fas fa-music text-white text-2xl"></i>
                         </div>
-                        <h3 class="text-2xl font-bold text-neutral-800 mb-4">{{ bands[0].name }}</h3>
+                        <h3 class="text-2xl font-bold text-neutral-800 mb-4">{{ bands[0].band.name }}</h3>
                         <div class="mb-6">
-                            {% if current_user.is_leader_of(bands[0].id) %}
+                            {% if current_user.is_leader_of(bands[0].band.id) %}
                                 <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium" style="background-color: #10b981; color: white;">
                                     <i class="fas fa-crown mr-2"></i> Band Leader
                                 </span>
@@ -42,14 +42,27 @@
                                 </span>
                             {% endif %}
                         </div>
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                        <p class="text-neutral-600 mt-4">Redirecting to dashboard...</p>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="text-center p-3 rounded-lg" style="background-color: #fdf8f6;">
+                                <div class="text-2xl font-bold" style="color: #e27551;">{{ bands[0].song_count }}</div>
+                                <div class="text-xs text-neutral-500">Songs</div>
+                            </div>
+                            <div class="text-center p-3 rounded-lg" style="background-color: #fdf8f6;">
+                                <div class="text-2xl font-bold" style="color: #e27551;">{{ bands[0].member_count }}</div>
+                                <div class="text-xs text-neutral-500">Members</div>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('main.switch_band', band_id=bands[0].band.id) }}" 
+                           class="nav-item w-full text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center" style="background: linear-gradient(135deg, #e27551, #d46947);">
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Switch to This Band
+                        </a>
                     </div>
                 </div>
             {% else %}
                 <!-- Multiple Bands Selection -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                    {% for band in bands %}
+                    {% for band_data in bands %}
                     <div class="group">
                         <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border-2 border-transparent hover:border-primary">
                             <div class="p-8">
@@ -60,11 +73,11 @@
                                             <i class="fas fa-music text-white text-xl"></i>
                                         </div>
                                         <div>
-                                            <h3 class="text-2xl font-bold text-neutral-800">{{ band.name }}</h3>
+                                            <h3 class="text-2xl font-bold text-neutral-800">{{ band_data.band.name }}</h3>
                                             <p class="text-neutral-500">Band</p>
                                         </div>
                                     </div>
-                                    {% if current_user.is_leader_of(band.id) %}
+                                    {% if current_user.is_leader_of(band_data.band.id) %}
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold text-white" style="background: linear-gradient(135deg, #f59e0b, #e2a551);">
                                             <i class="fas fa-crown mr-1"></i> Leader
                                         </span>
@@ -75,20 +88,20 @@
                                     {% endif %}
                                 </div>
 
-                                <!-- Band Stats (Placeholder for future features) -->
-                                <div class="grid grid-cols-2 gap-4 mb-6">
-                                    <div class="text-center p-3 rounded-lg" style="background-color: #fdf8f6;">
-                                        <div class="text-2xl font-bold" style="color: #e27551;">0</div>
-                                        <div class="text-xs text-neutral-500">Songs</div>
-                                    </div>
-                                    <div class="text-center p-3 rounded-lg" style="background-color: #fdf8f6;">
-                                        <div class="text-2xl font-bold" style="color: #e27551;">0</div>
-                                        <div class="text-xs text-neutral-500">Members</div>
-                                    </div>
-                                </div>
+                <!-- Band Stats -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="text-center p-3 rounded-lg" style="background-color: #fdf8f6;">
+                        <div class="text-2xl font-bold" style="color: #e27551;">{{ band_data.song_count }}</div>
+                        <div class="text-xs text-neutral-500">Songs</div>
+                    </div>
+                    <div class="text-center p-3 rounded-lg" style="background-color: #fdf8f6;">
+                        <div class="text-2xl font-bold" style="color: #e27551;">{{ band_data.member_count }}</div>
+                        <div class="text-xs text-neutral-500">Members</div>
+                    </div>
+                </div>
 
                                 <!-- Action Button -->
-                                <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
+                                <a href="{{ url_for('main.switch_band', band_id=band_data.band.id) }}" 
                                    class="nav-item w-full text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center group-hover:shadow-lg" style="background: linear-gradient(135deg, #e27551, #d46947);">
                                     <i class="fas fa-sign-in-alt mr-2"></i>
                                     Select This Band
@@ -211,12 +224,5 @@
     </div>
 </div>
 
-{% if bands and bands|length == 1 %}
-<script>
-    // Auto-redirect if user has only one band
-    setTimeout(function() {
-        window.location.href = "{{ url_for('main.dashboard') }}";
-    }, 2000);
-</script>
-{% endif %}
+
 {% endblock %}

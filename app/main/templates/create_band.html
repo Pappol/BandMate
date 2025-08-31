@@ -3,51 +3,104 @@
 {% block title %}Create New Band - BandMate{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white">
-                    <h3 class="mb-0">
-                        <i class="fas fa-plus-circle"></i> Create New Band
-                    </h3>
+<div class="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-green-500 rounded-full mb-6">
+                <i class="fas fa-plus text-white text-3xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-neutral-800 mb-4">Create New Band</h1>
+            <p class="text-xl text-neutral-600 max-w-2xl mx-auto">
+                Start a new band and become its leader. You'll have full control over band settings, member management, and song selection.
+            </p>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <!-- Features Preview -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="text-center p-4 rounded-xl" style="background-color: #f0fdf4;">
+                        <div class="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-crown text-white text-lg"></i>
+                        </div>
+                        <h4 class="font-semibold text-neutral-800 mb-2">Full Control</h4>
+                        <p class="text-sm text-neutral-600">Complete administrative access</p>
+                    </div>
+                    <div class="text-center p-4 rounded-xl" style="background-color: #f0fdf4;">
+                        <div class="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-user-plus text-white text-lg"></i>
+                        </div>
+                        <h4 class="font-semibold text-neutral-800 mb-2">Invite Members</h4>
+                        <p class="text-sm text-neutral-600">Share invitation codes</p>
+                    </div>
+                    <div class="text-center p-4 rounded-xl" style="background-color: #f0fdf4;">
+                        <div class="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style="background: linear-gradient(135deg, #10b981, #059669);">
+                            <i class="fas fa-cog text-white text-lg"></i>
+                        </div>
+                        <h4 class="font-semibold text-neutral-800 mb-2">Customize</h4>
+                        <p class="text-sm text-neutral-600">Set band preferences</p>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted mb-4">
-                        Start a new band and become its leader. You can invite other musicians to join later.
-                    </p>
+
+                <!-- Form -->
+                <form method="POST" action="{{ url_for('main.create_new_band') }}" class="space-y-6">
+                    <div>
+                        <label for="band_name" class="block text-sm font-medium text-neutral-700 mb-2">
+                            <i class="fas fa-music mr-2" style="color: #10b981;"></i>
+                            Band Name
+                        </label>
+                        <input type="text" 
+                               id="band_name" 
+                               name="band_name" 
+                               placeholder="Enter your band name"
+                               required
+                               maxlength="100"
+                               class="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-lg"
+                               style="background-color: #fdf8f6;">
+                        <div class="mt-2 text-sm text-neutral-500">
+                            <i class="fas fa-lightbulb mr-1" style="color: #f59e0b;"></i>
+                            Choose a unique and memorable name for your band
+                        </div>
+                    </div>
                     
-                    <form method="POST" action="{{ url_for('main.create_new_band') }}">
-                        <div class="mb-3">
-                            <label for="band_name" class="form-label">Band Name</label>
-                            <input type="text" 
-                                   class="form-control" 
-                                   id="band_name" 
-                                   name="band_name" 
-                                   placeholder="Enter your band name"
-                                   required
-                                   maxlength="100">
-                            <div class="form-text">
-                                Choose a unique and memorable name for your band.
-                            </div>
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-plus"></i> Create Band
-                            </button>
-                            <a href="{{ url_for('main.select_band') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left"></i> Back to Band Selection
-                            </a>
-                        </div>
-                    </form>
+                    <div class="pt-6">
+                        <button type="submit" 
+                                class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center text-lg">
+                            <i class="fas fa-plus mr-3"></i>
+                            Create Band
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Back Button -->
+                <div class="mt-6 text-center">
+                    <a href="{{ url_for('main.select_band') }}" 
+                       class="inline-flex items-center text-neutral-600 hover:text-neutral-800 transition-colors duration-200">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Band Selection
+                    </a>
                 </div>
-                
-                <div class="card-footer bg-light">
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle"></i>
-                        As the band creator, you'll automatically become the band leader with full management permissions.
-                    </small>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="mt-12 max-w-2xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex items-start">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center mr-4" style="background: linear-gradient(135deg, #f59e0b, #e2a551);">
+                        <i class="fas fa-info text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-neutral-800 mb-2">What happens next?</h3>
+                        <ul class="text-sm text-neutral-600 space-y-1">
+                            <li>• Your band will be created immediately</li>
+                            <li>• You'll automatically become the band leader</li>
+                            <li>• You can start adding songs and inviting members</li>
+                            <li>• You'll be redirected to your new band dashboard</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

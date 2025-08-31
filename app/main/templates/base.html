@@ -127,6 +127,30 @@
                 width: 1.25rem;
                 text-align: center;
             }
+            
+            /* Mobile dashboard optimizations */
+            .dashboard-card {
+                margin-bottom: 1rem;
+            }
+            
+            .dashboard-button {
+                width: 100%;
+                justify-content: center;
+                padding: 0.75rem 1rem;
+            }
+            
+            /* Ensure proper touch targets on mobile */
+            button, a {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* Improve mobile table readability */
+            .mobile-table-card {
+                border-radius: 0.5rem;
+                margin-bottom: 0.5rem;
+                box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            }
         }
         
         /* Ensure navigation items are properly spaced on all screen sizes */
@@ -137,6 +161,23 @@
             
             .nav-item:hover {
                 transform: translateY(-1px);
+            }
+        }
+        
+        /* Dashboard-specific mobile optimizations */
+        @media (max-width: 640px) {
+            .dashboard-header {
+                padding: 1rem;
+            }
+            
+            .dashboard-summary {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .dashboard-actions {
+                flex-direction: column;
+                gap: 0.75rem;
             }
         }
     </style>
@@ -182,7 +223,6 @@
                 <!-- Right side items -->
                 <div class="flex items-center">
                     <!-- Band Switcher (Desktop) -->
-                    {% if current_user.bands|length > 1 %}
                     <div class="hidden md:block relative" x-data="{ open: false }">
                         <button @click="open = !open" 
                                 class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
@@ -204,32 +244,26 @@
                              x-transition:leave-start="transform opacity-100 scale-100"
                              x-transition:leave-end="transform opacity-0 scale-95"
                              class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50">
-                             {% for band in current_user.bands %}
-                             <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
-                                class="nav-item block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors {% if current_band and current_band.id == band.id %}bg-primary-light text-white{% endif %}">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-medium">{{ band.name }}</span>
-                                    {% if current_user.is_leader_of(band.id) %}
-                                        <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
-                                    {% endif %}
-                                </div>
-                             </a>
-                             {% endfor %}
-                             <div class="border-t border-gray-100 my-1"></div>
+                             {% if current_user.bands|length > 1 %}
+                                 {% for band in current_user.bands %}
+                                 <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
+                                    class="nav-item block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors {% if current_band and current_band.id == band.id %}bg-primary-light text-white{% endif %}">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-medium">{{ band.name }}</span>
+                                        {% if current_user.is_leader_of(band.id) %}
+                                            <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
+                                        {% endif %}
+                                    </div>
+                                 </a>
+                                 {% endfor %}
+                                 <div class="border-t border-gray-100 my-1"></div>
+                             {% endif %}
                              <a href="{{ url_for('main.select_band') }}" 
                                 class="nav-item block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                 <i class="fas fa-cog mr-2"></i> Manage Bands
                              </a>
                         </div>
                     </div>
-                    {% elif current_band %}
-                    <div class="hidden md:flex items-center">
-                        <span class="text-white text-sm font-medium bg-white bg-opacity-20 px-3 py-2 rounded-md">
-                            <i class="fas fa-users mr-2"></i>
-                            {{ current_band.name }}
-                        </span>
-                    </div>
-                    {% endif %}
                     
                     <!-- User info and logout (Desktop) -->
                     <div class="hidden md:flex items-center space-x-4">
@@ -288,44 +322,38 @@
             </div>
             
             <!-- Band Management Section -->
-            {% if current_user.bands|length > 1 %}
             <div class="border-t border-primary-light mx-4 my-3"></div>
             <div class="px-4 pb-4">
                 <div class="text-primary-light text-xs font-semibold uppercase tracking-wide px-4 py-2">
-                    Bands
+                    {% if current_user.bands|length > 1 %}Bands{% else %}Current Band{% endif %}
                 </div>
-                {% for band in current_user.bands %}
-                <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
-                   class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
-                    <div class="flex items-center justify-between">
-                        <span class="font-medium">
-                            <i class="fas fa-users mr-3"></i>
-                            {{ band.name }}
-                        </span>
-                        {% if current_user.is_leader_of(band.id) %}
-                            <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
-                        {% endif %}
+                {% if current_user.bands|length > 1 %}
+                    {% for band in current_user.bands %}
+                    <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
+                       class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium">
+                                <i class="fas fa-users mr-3"></i>
+                                {{ band.name }}
+                            </span>
+                            {% if current_user.is_leader_of(band.id) %}
+                                <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
+                            {% endif %}
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% elif current_band %}
+                    <div class="mobile-nav-item text-white bg-white bg-opacity-20 rounded-lg">
+                        <i class="fas fa-users mr-3"></i>
+                        <span class="font-medium">{{ current_band.name }}</span>
                     </div>
-                </a>
-                {% endfor %}
+                {% endif %}
                 <a href="{{ url_for('main.select_band') }}" 
                    class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                     <i class="fas fa-cog mr-3"></i>
                     Manage Bands
                 </a>
             </div>
-            {% elif current_band %}
-            <div class="border-t border-primary-light mx-4 my-3"></div>
-            <div class="px-4 pb-4">
-                <div class="text-primary-light text-xs font-semibold uppercase tracking-wide px-4 py-2">
-                    Current Band
-                </div>
-                <div class="mobile-nav-item text-white bg-white bg-opacity-20 rounded-lg">
-                    <i class="fas fa-users mr-3"></i>
-                    <span class="font-medium">{{ current_band.name }}</span>
-                </div>
-            </div>
-            {% endif %}
             
             <!-- User Section -->
             <div class="border-t border-primary-light mx-4 my-3"></div>

@@ -161,7 +161,7 @@ def approve_song():
         song.status = SongStatus.ACTIVE
         
         # Create progress records for all band members
-        current_band = Band.query.get(current_band_id)
+        current_band = db.session.get(Band, current_band_id)
         band_members = User.query.join(band_membership).filter(
             band_membership.c.band_id == current_band_id
         ).all()
