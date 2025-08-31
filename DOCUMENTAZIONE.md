@@ -43,6 +43,8 @@
 - [x] **Buffer percentuali per canzoni nuove vs imparate** ✅
 - [x] **Configurazione tempo pausa personalizzabile** ✅
 - [x] **Clustering tempo in intervalli di 30 minuti** ✅
+- [x] **Validazione presenza canzoni attive** ✅
+- [x] **Controllo dati progresso per generazione setlist** ✅
 
 ## 🏗️ ARCHITETTURA E DESIGN
 
@@ -91,6 +93,27 @@ Vote (Voto)
 - **Blueprint Pattern**: Per organizzare le route
 - **Decorator Pattern**: Per i controlli di autorizzazione
 - **Repository Pattern**: Per l'accesso ai dati
+
+## 🔧 CORREZIONI RECENTI
+
+### Wishlist Voting
+- [x] **Vote count update immediato** ✅
+  - Risolto problema aggiornamento conteggio voti senza refresh
+  - Migliorata UX con feedback visivo immediato
+  - Consolidata logica Alpine.js per gestione stato
+
+### Google OAuth Band Creation
+- [x] **Flusso autenticazione corretto** ✅
+  - Risolto problema redirect loop per utenti Google OAuth
+  - Aggiornata route `/create_band` per sistema multi-band
+  - Corretta integrazione con nuovo modello dati
+
+### Setlist Generation Validation
+- [x] **Controlli validazione robusti** ✅
+  - Aggiunta validazione presenza canzoni attive
+  - Controllo dati progresso per generazione setlist
+  - Messaggi di errore informativi per utenti
+  - UI migliorata con guide e stati vuoti
 
 ## 🎵 INTEGRAZIONE SPOTIFY API
 

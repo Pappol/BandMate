@@ -81,7 +81,28 @@
                 </div>
             </div>
 
-            <div class="flex justify-center">
+            <!-- Helpful Information -->
+            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-blue-800">Before generating a setlist:</h3>
+                        <div class="mt-2 text-sm text-blue-700">
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Make sure you have active songs in your band's repertoire</li>
+                                <li>Update the progress status of your songs (To Listen, In Practice, Ready for Rehearsal, or Mastered)</li>
+                                <li>Setlist will be optimized based on learning vs. maintenance ratio</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center mt-6">
                 <button @click="generateSetlist()" 
                         :disabled="generating"
                         class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
@@ -99,6 +120,17 @@
 
         <!-- Results -->
         <div x-show="setlist && setlist.length > 0" x-cloak class="bg-white shadow rounded-lg overflow-hidden">
+        
+        <!-- Empty State -->
+        <div x-show="!setlist || setlist.length === 0" x-cloak class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-6 py-12 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No setlist generated yet</h3>
+                <p class="mt-1 text-sm text-gray-500">Click "Generate Setlist" above to create your first setlist.</p>
+            </div>
+        </div>
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Generated Setlist</h3>
         </div>

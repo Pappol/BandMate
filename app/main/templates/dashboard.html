@@ -152,11 +152,11 @@
         <!-- Mobile: Card Layout, Desktop: Table Layout -->
         <div class="block lg:hidden">
             <!-- Mobile Card View -->
-            <div class="divide-y divide-gray-200">
+            <div class="divide-y divide-gray-200 {% if songs|length == 1 %}divide-y-0{% endif %}">
                 {% for song in songs %}
-                <div class="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                <div class="p-4 sm:p-6 hover:bg-gray-50 transition-colors min-h-0 dashboard-card">
                     <!-- Song Header -->
-                    <div class="flex items-start space-x-3 mb-4">
+                    <div class="flex items-start space-x-3 mb-6">
                         <div class="flex-shrink-0">
                             {% if song.album_art_url %}
                                 <img src="{{ song.album_art_url }}" 
@@ -201,10 +201,10 @@
                     </div>
 
                     <!-- Readiness Score -->
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between mb-2">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3">
                             <span class="text-sm font-medium text-gray-700">Overall Readiness</span>
-                            <span class="text-sm text-gray-900">{{ "%.1f"|format(song.readiness_score) }}/4</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ "%.1f"|format(song.readiness_score) }}/4</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-3">
                             <div class="progress-bar h-3 rounded-full transition-all duration-300" 
@@ -216,9 +216,9 @@
                     <div class="space-y-3">
                         <h5 class="text-sm font-medium text-gray-700">Member Progress</h5>
                         {% for member in members %}
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between py-2">
                             <div class="flex items-center space-x-2">
-                                <span class="text-sm text-gray-600">{{ member.name }}</span>
+                                <span class="text-sm font-medium text-gray-700">{{ member.name }}</span>
                                 {% if member.is_band_leader %}
                                     <span class="text-yellow-600">👑</span>
                                 {% endif %}
@@ -278,7 +278,7 @@
                                              x-transition:leave="transition ease-in duration-75"
                                              x-transition:leave-start="transform opacity-100 scale-100"
                                              x-transition:leave-end="transform opacity-0 scale-95"
-                                             class="absolute z-10 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 right-0">
+                                             class="absolute z-50 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 left-0 sm:left-auto sm:right-0">
                                             <div class="py-1">
                                                 <button @click="updateProgress('To Listen')" 
                                                         class="nav-item block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -451,7 +451,7 @@
                                              x-transition:leave="transition ease-in duration-75"
                                              x-transition:leave-start="transform opacity-100 scale-100"
                                              x-transition:leave-end="transform opacity-0 scale-95"
-                                             class="absolute z-10 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                                             class="absolute z-50 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 left-0">
                                             <div class="py-1">
                                                 <button @click="updateProgress('To Listen')" 
                                                         class="nav-item block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -515,4 +515,47 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Custom CSS for dashboard improvements -->
+<style>
+    /* Ensure dropdowns are always visible */
+    .z-50 {
+        z-index: 9999 !important;
+    }
+    
+    /* Better mobile spacing */
+    @media (max-width: 640px) {
+        .dashboard-card {
+            margin-bottom: 1rem;
+        }
+        
+        .dashboard-card:last-child {
+            margin-bottom: 0;
+        }
+    }
+    
+    /* Improve progress bar visibility */
+    .progress-bar {
+        background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+        transition: width 0.3s ease;
+    }
+    
+    /* Better mobile touch targets */
+    @media (max-width: 640px) {
+        button, .nav-item {
+            min-height: 44px;
+        }
+    }
+    
+    /* Ensure proper spacing on mobile */
+    @media (max-width: 640px) {
+        .space-y-3 > * + * {
+            margin-top: 0.75rem;
+        }
+        
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+    }
+</style>
 {% endblock %}

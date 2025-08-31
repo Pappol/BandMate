@@ -490,6 +490,10 @@ def generate_setlist():
             status=SongStatus.ACTIVE
         ).all()
         
+        # Check if there are any active songs
+        if not active_songs:
+            return jsonify({'error': 'No active songs found in your band. Please add some songs to your repertoire before generating a setlist.'}), 400
+        
         # Separate songs into learning and maintenance pools
         learning_pool = []
         maintenance_pool = []
@@ -510,6 +514,10 @@ def generate_setlist():
                 maintenance_pool.append(song)
             else:
                 learning_pool.append(song)
+        
+        # Check if there are any songs with progress data
+        if not learning_pool and not maintenance_pool:
+            return jsonify({'error': 'No songs with progress data found. Please update the progress status of your songs before generating a setlist.'}), 400
         
         # Sort learning pool by readiness score (descending)
         learning_pool.sort(key=lambda x: x.readiness_score, reverse=True)

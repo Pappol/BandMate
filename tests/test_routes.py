@@ -204,12 +204,13 @@ class TestSetlistRoutes:
             # Mock authentication
             with client.session_transaction() as sess:
                 sess['_user_id'] = test_user.id
+                sess['current_band_id'] = test_band.id
             
-            # Create progress record
+            # Create progress record with valid status for setlist generation
             progress = SongProgress(
                 user_id=test_user.id,
                 song_id=test_song.id,
-                status=ProgressStatus.IN_PRACTICE
+                status=ProgressStatus.READY_FOR_REHEARSAL
             )
             db.session.add(progress)
             db.session.commit()
@@ -240,6 +241,22 @@ class TestSetlistRoutes:
             response = client.post('/generate_setlist', 
                                 json={'duration_minutes_total': 60, 'learning_ratio': 1.5})
             assert response.status_code == 400
+    
+    def test_generate_setlist_no_songs(self, client, app, test_band, test_user):
+        """Test setlist generation when no songs exist."""
+        with app.app_context():
+            # Mock authentication
+            with client.session_transaction() as sess:
+                sess['_user_id'] = test_user.id
+                sess['current_band_id'] = test_band.id
+            
+            response = client.post('/generate_setlist', 
+                                json={'duration_minutes_total': 60, 'learning_ratio': 0.5})
+            
+            assert response.status_code == 400
+            data = json.loads(response.data)
+            assert 'error' in data
+            assert 'No active songs found' in data['error']
 
 class TestAPIRoutes:
     """Test API endpoints."""
