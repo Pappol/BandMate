@@ -17,9 +17,11 @@
 - [x] Gestione sessioni
 
 ### Gestione Band
-- [] Creazione di nuove band
-- [] Invito di membri (sistema base)
-- [] Gestione ruoli e permessi
+- [x] Creazione di nuove band
+- [x] Invito di membri (sistema base)
+- [x] **Sistema di inviti esteso per tutti i membri** ✅
+- [x] **Gestione ruoli e permessi** ✅
+- [x] **Possibilità per i membri di lasciare la band** ✅
 
 ### Gestione Canzoni
 - [x] Aggiunta canzoni alla wishlist
@@ -158,6 +160,51 @@ SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
 2. **Setlist Generator**: Durata automatica per ottimizzazione prove
 3. **Dashboard Professionale**: Album art per interfaccia più accattivante
 4. **Dati Precisi**: Informazioni ufficiali Spotify (titolo, artista, album)
+
+## 👥 GESTIONE BAND AVANZATA
+
+### Funzionalità di Gestione Membri
+- [x] **Sistema di Inviti Esteso** ✅
+  - I band leader possono abilitare tutti i membri a inviare inviti
+  - Toggle on/off per la funzionalità di inviti per membri
+  - Controllo granulare sui permessi di invito
+  - Interfaccia intuitiva per la gestione delle impostazioni
+
+- [x] **Possibilità di Lasciare la Band** ✅
+  - I membri possono lasciare volontariamente la band
+  - Controlli di sicurezza per i leader (devono trasferire leadership se sono gli unici)
+  - Gestione automatica delle sessioni dopo l'uscita
+  - Reindirizzamento alla selezione band dopo l'uscita
+
+- [x] **Gestione Ruoli e Permessi** ✅
+  - Sistema di ruoli gerarchico (Leader, Member)
+  - Permessi differenziati per funzionalità
+  - Trasferimento di leadership tra membri
+  - Rimozione sicura di membri da parte dei leader
+
+### Architettura del Sistema
+```
+Band Model
+├── allow_member_invites (Boolean)
+├── can_user_invite(user_id) method
+└── Gestione permessi granulare
+
+User Model
+├── get_band_role(band_id) method
+├── is_leader_of(band_id) method
+└── is_member_of(band_id) method
+
+Routes
+├── /band/leave (POST) - Uscita volontaria
+├── /band/toggle-member-invites (POST) - Toggle inviti
+└── /band/invite (POST) - Invio inviti (con permessi)
+```
+
+### Vantaggi delle Nuove Funzionalità
+1. **Collaborazione Migliorata**: Tutti i membri possono contribuire alla crescita della band
+2. **Flessibilità**: I membri possono gestire la loro partecipazione
+3. **Scalabilità**: Sistema di permessi estendibile per future funzionalità
+4. **Sicurezza**: Controlli appropriati per prevenire abusi
 
 ## 🚧 TASK OPERATIVI DA COMPLETARE
 

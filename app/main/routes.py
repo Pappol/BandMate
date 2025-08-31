@@ -8,6 +8,7 @@ from app import db
 from app.spotify import spotify_api
 from datetime import datetime, date, timedelta
 import json
+import uuid
 
 @main.route('/')
 def index():
@@ -746,8 +747,14 @@ def invite_member():
         flash('No band selected. Please select a band first.', 'warning')
         return redirect(url_for('main.select_band'))
     
-    if not current_user.is_leader_of(current_band_id):
-        flash('Only band leaders can invite new members.', 'error')
+    # Get the band and check if user can invite
+    band = db.session.get(Band, current_band_id)
+    if not band:
+        flash('Band not found.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    if not band.can_user_invite(current_user.id):
+        flash('You do not have permission to invite new members.', 'error')
         return redirect(url_for('main.band_management'))
     
     email = request.form.get('email')
@@ -928,15 +935,104 @@ def remove_member(member_id):
         return redirect(url_for('main.band_management'))
     
     try:
-        # Remove the member
-        db.session.delete(member)
-        db.session.commit()
+        # Remove the member from the band (not delete the user)
+        band = db.session.get(Band, current_band_id)
+        band.remove_member(member_id)
         flash(f'{member.name} has been removed from the band.', 'success')
         
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error removing member: {e}")
         flash('Failed to remove member. Please try again.', 'error')
+    
+    return redirect(url_for('main.band_management'))
+
+@main.route('/band/leave', methods=['POST'])
+@login_required
+def leave_band():
+    """Allow a band member to leave the band themselves"""
+    # Get current band from session
+    current_band_id = session.get('current_band_id')
+    if not current_band_id:
+        flash('No band selected. Please select a band first.', 'warning')
+        return redirect(url_for('main.select_band'))
+    
+    # Check if user is a member of the current band
+    if not current_user.is_member_of(current_band_id):
+        flash('You are not a member of this band.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    # Get the band
+    band = db.session.get(Band, current_band_id)
+    if not band:
+        flash('Band not found.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    # Check if user is the only leader
+    if current_user.is_leader_of(current_band_id):
+        # Count how many leaders the band has
+        from sqlalchemy import text
+        result = db.session.execute(
+            text('SELECT COUNT(*) FROM band_membership WHERE band_id = :band_id AND role = :role'),
+            {'band_id': current_band_id, 'role': UserRole.LEADER.value}
+        ).fetchone()
+        leader_count = result[0] if result else 0
+        
+        if leader_count <= 1:
+            flash('You cannot leave the band as you are the only leader. Please transfer leadership to another member first or delete the band.', 'error')
+            return redirect(url_for('main.band_management'))
+    
+    try:
+        # Remove the user from the band
+        band.remove_member(current_user.id)
+        
+        # Clear the current band session
+        session.pop('current_band_id', None)
+        
+        flash(f'You have successfully left "{band.name}".', 'success')
+        
+        # Redirect to band selection page
+        return redirect(url_for('main.select_band'))
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error leaving band: {e}")
+        flash('Failed to leave band. Please try again.', 'error')
+        return redirect(url_for('main.band_management'))
+
+@main.route('/band/toggle-member-invites', methods=['POST'])
+@login_required
+def toggle_member_invites():
+    """Toggle whether all members can send invitations"""
+    # Get current band from session
+    current_band_id = session.get('current_band_id')
+    if not current_band_id:
+        flash('No band selected. Please select a band first.', 'warning')
+        return redirect(url_for('main.select_band'))
+    
+    # Only band leaders can change this setting
+    if not current_user.is_leader_of(current_band_id):
+        flash('Only band leaders can change invitation settings.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    # Get the band
+    band = db.session.get(Band, current_band_id)
+    if not band:
+        flash('Band not found.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    try:
+        # Toggle the setting
+        band.allow_member_invites = not band.allow_member_invites
+        db.session.commit()
+        
+        status = "enabled" if band.allow_member_invites else "disabled"
+        flash(f'Member invitations have been {status}.', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error toggling member invites: {e}")
+        flash('Failed to update invitation settings. Please try again.', 'error')
     
     return redirect(url_for('main.band_management'))
 
@@ -1213,6 +1309,98 @@ def create_new_band():
     
     return render_template('create_band.html')
 
+@main.route('/register', methods=['GET', 'POST'])
+def register():
+    """User registration without Google OAuth"""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+        
+        # Validation
+        if not all([name, email, password, confirm_password]):
+            flash('All fields are required.', 'error')
+            return render_template('register.html')
+        
+        if password != confirm_password:
+            flash('Passwords do not match.', 'error')
+            return render_template('register.html')
+        
+        if len(password) < 6:
+            flash('Password must be at least 6 characters long.', 'error')
+            return render_template('register.html')
+        
+        # Check if user already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash('A user with this email already exists.', 'error')
+            return render_template('register.html')
+        
+        try:
+            # Create new user
+            user = User(
+                id=str(uuid.uuid4()),
+                name=name,
+                email=email
+            )
+            # In a real app, you would hash the password here
+            # For now, we'll use a simple approach for demo purposes
+            user.set_password(password)
+            
+            db.session.add(user)
+            db.session.commit()
+            
+            # Log the user in
+            login_user(user)
+            flash('Account created successfully! Welcome to BandMate!', 'success')
+            
+            # Redirect to onboarding
+            return redirect(url_for('main.onboarding'))
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error creating user: {e}")
+            flash('Failed to create account. Please try again.', 'error')
+            return render_template('register.html')
+    
+    return render_template('register.html')
+
+@main.route('/login/email', methods=['GET', 'POST'])
+def login_with_email():
+    """User login with email and password"""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        if not email or not password:
+            flash('Email and password are required.', 'error')
+            return render_template('login_email.html')
+        
+        # Find user by email
+        user = User.query.filter_by(email=email).first()
+        
+        if user and user.check_password(password):
+            login_user(user)
+            flash(f'Welcome back, {user.name}!', 'success')
+            
+            # Check if user has any bands
+            if user.bands:
+                return redirect(url_for('main.select_band'))
+            else:
+                return redirect(url_for('main.onboarding'))
+        else:
+            flash('Invalid email or password.', 'error')
+            return render_template('login_email.html')
+    
+    return render_template('login_email.html')
+
 @main.route('/band/join', methods=['GET', 'POST'])
 @login_required
 def join_band():
@@ -1233,7 +1421,7 @@ def join_band():
         # Check if user is already a member
         if current_user.is_member_of(invitation.band_id):
             flash('You are already a member of this band.', 'info')
-            return redirect(url_for('main.dashboard'))
+            return render_template('join_band.html')
         
         try:
             # Add user to band

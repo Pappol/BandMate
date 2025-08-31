@@ -96,6 +96,7 @@ class User(UserMixin, db.Model):
                      default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)  # For manual registration
     # Legacy columns - kept for backward compatibility during migration
     band_id = db.Column(db.Integer, db.ForeignKey('bands.id'), nullable=True)
     is_band_leader = db.Column(db.Boolean, default=False)
@@ -148,6 +149,16 @@ class User(UserMixin, db.Model):
         # Fallback to legacy band if no bands in new system
         return self.band
 
+    def set_password(self, password):
+        """Set password hash for the user"""
+        import hashlib
+        self.password_hash = hashlib.sha256(password.encode()).hexdigest()
+    
+    def check_password(self, password):
+        """Check if the provided password matches the stored hash"""
+        import hashlib
+        return self.password_hash == hashlib.sha256(password.encode()).hexdigest()
+
 
 class Band(db.Model):
     """Band model"""
@@ -158,6 +169,7 @@ class Band(db.Model):
     emoji = db.Column(db.String(10), nullable=True)  # Emoji for band identification
     color = db.Column(db.String(7), nullable=True)   # Hex color code (e.g., #FF5733)
     letter = db.Column(db.String(1), nullable=True)  # Single letter identifier
+    allow_member_invites = db.Column(db.Boolean, default=False)  # Allow all members to send invitations
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # New many-to-many relationship with users
@@ -229,6 +241,18 @@ class Band(db.Model):
             db.session.flush()  # Use flush instead of commit to avoid transaction issues
             return config
         return self.setlist_config
+
+    def can_user_invite(self, user_id):
+        """Check if a user can send invitations to this band"""
+        if not user_id:
+            return False
+        
+        # Leaders can always invite
+        if self.get_member_role(user_id) == UserRole.LEADER.value:
+            return True
+        
+        # Regular members can invite if the setting is enabled
+        return self.allow_member_invites
 
     def get_display_identifier(self):
         """Get the best available identifier for display (emoji, letter, or first letter of name)"""
