@@ -940,6 +940,52 @@ def remove_member(member_id):
     
     return redirect(url_for('main.band_management'))
 
+@main.route('/band/make-leader/<string:member_id>', methods=['POST'])
+@login_required
+def make_leader(member_id):
+    """Make another member the new band leader"""
+    # Get current band from session
+    current_band_id = session.get('current_band_id')
+    if not current_band_id:
+        flash('No band selected. Please select a band first.', 'warning')
+        return redirect(url_for('main.select_band'))
+    
+    if not current_user.is_leader_of(current_band_id):
+        flash('Only band leaders can transfer leadership.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    if member_id == current_user.id:
+        flash('You are already the band leader.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    member = User.query.get_or_404(member_id)
+    
+    if not member.is_member_of(current_band_id):
+        flash('Member not found in your band.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    if member.get_band_role(current_band_id) == UserRole.LEADER.value:
+        flash('This member is already a band leader.', 'error')
+        return redirect(url_for('main.band_management'))
+    
+    try:
+        # Get the band
+        band = db.session.get(Band, current_band_id)
+        
+        # Update roles: current user becomes member, selected member becomes leader
+        band.update_member_role(current_user.id, UserRole.MEMBER)
+        band.update_member_role(member_id, UserRole.LEADER)
+        
+        db.session.commit()
+        flash(f'{member.name} is now the new band leader. You are now a regular member.', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error transferring leadership: {e}")
+        flash('Failed to transfer leadership. Please try again.', 'error')
+    
+    return redirect(url_for('main.band_management'))
+
 @main.route('/setlist/config')
 @login_required
 @band_leader_required

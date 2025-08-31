@@ -208,6 +208,15 @@ class Band(db.Model):
         )
         db.session.commit()
 
+    def update_member_role(self, user_id, new_role):
+        """Update a member's role in this band"""
+        db.session.execute(
+            text('UPDATE band_membership SET role = :role WHERE user_id = :user_id '
+                 'AND band_id = :band_id'),
+            {'user_id': user_id, 'band_id': self.id, 'role': new_role.value}
+        )
+        db.session.commit()
+
     def get_setlist_config(self):
         """Get or create default setlist configuration for the band"""
         if not self.setlist_config:

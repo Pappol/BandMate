@@ -217,6 +217,10 @@
                            class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium transition-colors">
                             Setlist Generator
                         </a>
+                        <a href="{{ url_for('main.band_management') }}" 
+                           class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            Band Management
+                        </a>
                     </div>
                 </div>
                 
@@ -318,6 +322,11 @@
                    class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                     <i class="fas fa-list mr-3"></i>
                     Setlist Generator
+                </a>
+                <a href="{{ url_for('main.band_management') }}" 
+                   class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
+                    <i class="fas fa-cog mr-3"></i>
+                    Band Management
                 </a>
             </div>
             
