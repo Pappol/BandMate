@@ -110,10 +110,33 @@
             .mobile-nav-item {
                 padding: 1rem;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                transition: all 0.2s ease-in-out;
             }
             
             .mobile-nav-item:last-child {
                 border-bottom: none;
+            }
+            
+            .mobile-nav-item:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                transform: translateX(4px);
+            }
+            
+            /* Ensure proper spacing on small screens */
+            .mobile-nav-item i {
+                width: 1.25rem;
+                text-align: center;
+            }
+        }
+        
+        /* Ensure navigation items are properly spaced on all screen sizes */
+        @media (min-width: 768px) {
+            .nav-item {
+                transition: all 0.2s ease-in-out;
+            }
+            
+            .nav-item:hover {
+                transform: translateY(-1px);
             }
         }
     </style>
@@ -129,28 +152,28 @@
                 <!-- Logo and Brand -->
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="flex items-center">
+                        <a href="{{ url_for('main.index') }}" class="nav-item flex items-center hover:opacity-80 transition-opacity">
                             <div class="bg-white bg-opacity-20 rounded-full p-1 mr-2">
                                 <img src="{{ url_for('static', filename='BandMateLogo.png') }}" alt="BandMate Logo" class="h-6 w-6">
                             </div>
                             <h1 class="text-white text-xl font-bold">BandMate</h1>
-                        </div>
+                        </a>
                     </div>
                 </div>
                 
                 <!-- Desktop Navigation -->
                 <div class="hidden md:block">
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-6">
                         <a href="{{ url_for('main.dashboard') }}" 
-                           class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
+                           class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium transition-colors">
                             Dashboard
                         </a>
                         <a href="{{ url_for('main.wishlist') }}" 
-                           class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
+                           class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium transition-colors">
                             Wishlist
                         </a>
                         <a href="{{ url_for('main.setlist_generator') }}" 
-                           class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
+                           class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium transition-colors">
                             Setlist Generator
                         </a>
                     </div>
@@ -162,7 +185,7 @@
                     {% if current_user.bands|length > 1 %}
                     <div class="hidden md:block relative" x-data="{ open: false }">
                         <button @click="open = !open" 
-                                class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                                class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
                             <i class="fas fa-users mr-2"></i>
                             {% if current_band %}
                                 {{ current_band.name }}
@@ -180,12 +203,12 @@
                              x-transition:leave="transition ease-in duration-75"
                              x-transition:leave-start="transform opacity-100 scale-100"
                              x-transition:leave-end="transform opacity-0 scale-95"
-                             class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
+                             class="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50">
                              {% for band in current_user.bands %}
                              <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if current_band and current_band.id == band.id %}bg-primary-light text-white{% endif %}">
+                                class="nav-item block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors {% if current_band and current_band.id == band.id %}bg-primary-light text-white{% endif %}">
                                 <div class="flex items-center justify-between">
-                                    <span>{{ band.name }}</span>
+                                    <span class="font-medium">{{ band.name }}</span>
                                     {% if current_user.is_leader_of(band.id) %}
                                         <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
                                     {% endif %}
@@ -194,16 +217,18 @@
                              {% endfor %}
                              <div class="border-t border-gray-100 my-1"></div>
                              <a href="{{ url_for('main.select_band') }}" 
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                class="nav-item block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
                                 <i class="fas fa-cog mr-2"></i> Manage Bands
                              </a>
                         </div>
                     </div>
                     {% elif current_band %}
-                    <span class="hidden md:block text-white text-sm">
-                        <i class="fas fa-users mr-2"></i>
-                        {{ current_band.name }}
-                    </span>
+                    <div class="hidden md:flex items-center">
+                        <span class="text-white text-sm font-medium bg-white bg-opacity-20 px-3 py-2 rounded-md">
+                            <i class="fas fa-users mr-2"></i>
+                            {{ current_band.name }}
+                        </span>
+                    </div>
                     {% endif %}
                     
                     <!-- User info and logout (Desktop) -->
@@ -211,11 +236,11 @@
                         <span class="text-white text-sm">
                             {{ current_user.name }}
                             {% if current_band and current_user.is_leader_of(current_band.id) %}
-                                <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
+                                <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs ml-2">Leader</span>
                             {% endif %}
                         </span>
                         <a href="{{ url_for('main.logout_route') }}" 
-                           class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
+                           class="nav-item text-white hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium transition-colors">
                             Logout
                         </a>
                     </div>
@@ -223,7 +248,7 @@
                     <!-- Mobile menu button -->
                     <div class="md:hidden">
                         <button @click="mobileMenuOpen = !mobileMenuOpen" 
-                                class="text-white hover:bg-primary-hover p-2 rounded-md">
+                                class="nav-item text-white hover:bg-primary-hover p-2 rounded-md transition-colors">
                             <i class="fas fa-bars text-xl" x-show="!mobileMenuOpen"></i>
                             <i class="fas fa-times text-xl" x-show="mobileMenuOpen"></i>
                         </button>
@@ -244,19 +269,19 @@
              @click.away="mobileMenuOpen = false">
             
             <!-- Navigation Links -->
-            <div class="px-2 pt-2 pb-3 space-y-1">
+            <div class="px-4 pt-4 pb-4 space-y-2">
                 <a href="{{ url_for('main.dashboard') }}" 
-                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                   class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                     <i class="fas fa-tachometer-alt mr-3"></i>
                     Dashboard
                 </a>
                 <a href="{{ url_for('main.wishlist') }}" 
-                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                   class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                     <i class="fas fa-heart mr-3"></i>
                     Wishlist
                 </a>
                 <a href="{{ url_for('main.setlist_generator') }}" 
-                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                   class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                     <i class="fas fa-list mr-3"></i>
                     Setlist Generator
                 </a>
@@ -264,16 +289,16 @@
             
             <!-- Band Management Section -->
             {% if current_user.bands|length > 1 %}
-            <div class="border-t border-primary-light mx-4 my-2"></div>
-            <div class="px-2 pb-3">
+            <div class="border-t border-primary-light mx-4 my-3"></div>
+            <div class="px-4 pb-4">
                 <div class="text-primary-light text-xs font-semibold uppercase tracking-wide px-4 py-2">
                     Bands
                 </div>
                 {% for band in current_user.bands %}
                 <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
-                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                   class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                     <div class="flex items-center justify-between">
-                        <span>
+                        <span class="font-medium">
                             <i class="fas fa-users mr-3"></i>
                             {{ band.name }}
                         </span>
@@ -284,36 +309,36 @@
                 </a>
                 {% endfor %}
                 <a href="{{ url_for('main.select_band') }}" 
-                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                   class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                     <i class="fas fa-cog mr-3"></i>
                     Manage Bands
                 </a>
             </div>
             {% elif current_band %}
-            <div class="border-t border-primary-light mx-4 my-2"></div>
-            <div class="px-2 pb-3">
+            <div class="border-t border-primary-light mx-4 my-3"></div>
+            <div class="px-4 pb-4">
                 <div class="text-primary-light text-xs font-semibold uppercase tracking-wide px-4 py-2">
                     Current Band
                 </div>
-                <div class="mobile-nav-item text-white">
+                <div class="mobile-nav-item text-white bg-white bg-opacity-20 rounded-lg">
                     <i class="fas fa-users mr-3"></i>
-                    {{ current_band.name }}
+                    <span class="font-medium">{{ current_band.name }}</span>
                 </div>
             </div>
             {% endif %}
             
             <!-- User Section -->
-            <div class="border-t border-primary-light mx-4 my-2"></div>
-            <div class="px-2 pb-3">
+            <div class="border-t border-primary-light mx-4 my-3"></div>
+            <div class="px-4 pb-4">
                 <div class="mobile-nav-item text-white">
                     <i class="fas fa-user mr-3"></i>
-                    {{ current_user.name }}
+                    <span class="font-medium">{{ current_user.name }}</span>
                     {% if current_band and current_user.is_leader_of(current_band.id) %}
                         <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs ml-2">Leader</span>
                     {% endif %}
                 </div>
                 <a href="{{ url_for('main.logout_route') }}" 
-                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                   class="nav-item mobile-nav-item text-white hover:bg-primary-hover block rounded-lg transition-colors">
                     <i class="fas fa-sign-out-alt mr-3"></i>
                     Logout
                 </a>
@@ -327,7 +352,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <a href="{{ url_for('main.index') }}" class="flex items-center text-white text-xl font-bold">
+                        <a href="{{ url_for('main.index') }}" class="nav-item flex items-center text-white text-xl font-bold hover:opacity-80 transition-opacity">
                             <img src="{{ url_for('static', filename='BandMateLogo.png') }}" alt="BandMate Logo" class="h-8 w-8 mr-2">
                             BandMate
                         </a>
@@ -335,7 +360,7 @@
                 </div>
                 <div class="flex items-center">
                     <a href="{{ url_for('main.login') }}" 
-                       class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
+                       class="nav-item text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium transition-colors">
                         Login
                     </a>
                 </div>
