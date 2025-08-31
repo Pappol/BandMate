@@ -109,50 +109,5 @@ SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
 4. **Generate Setlists**: Create optimized practice schedules
 5. **Vote & Propose**: Contribute to the band's song selection
 
-## 🧪 Testing
-
-```bash
-# Run all tests
-pytest
-
-# Run with coverage
-pytest --cov=app
-
-# Run multi-band specific tests
-python run_multi_band_tests.py
-```
-
-## 🚀 Deployment
-
-### Render
-- Connect GitHub repository
-- Set environment variables
-- Build: `pip install -r requirements.txt`
-- Start: `gunicorn manage:app`
-
-### Docker
-```bash
-docker-compose up --build
-```
-
-## 📚 Documentation
-
-- **API Reference**: See `/docs` folder
-- **Multi-Band Guide**: `MULTI_BAND_README.md`
-- **Spotify Integration**: `SPOTIFY_INTEGRATION_README.md`
-- **Setlist Algorithm**: Detailed in `DOCUMENTAZIONE.md`
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make changes and add tests
-4. Submit a pull request
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
-
----
 
 **BandMate** - Because great music happens when everyone knows what they're doing. 🎸✨

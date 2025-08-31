@@ -12,6 +12,9 @@
     <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <!-- Custom styles -->
     <style>
         :root {
@@ -66,16 +69,64 @@
         .hover\:bg-complementary:hover { background-color: var(--color-complementary-dark) !important; }
         .focus\:ring-primary:focus { --tw-ring-color: var(--color-primary) !important; }
         .focus\:border-primary:focus { border-color: var(--color-primary) !important; }
+        
+        /* Mobile menu transitions */
+        .mobile-menu-enter {
+            transition: all 0.3s ease-out;
+        }
+        .mobile-menu-enter-from {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+        .mobile-menu-enter-to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .mobile-menu-leave {
+            transition: all 0.3s ease-in;
+        }
+        .mobile-menu-leave-from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .mobile-menu-leave-to {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+        
+        /* Ensure footer is always visible */
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        main {
+            flex: 1;
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .mobile-nav-item {
+                padding: 1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .mobile-nav-item:last-child {
+                border-bottom: none;
+            }
+        }
     </style>
     
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-neutral-50 min-h-screen">
+<body class="bg-neutral-50">
     <!-- Navigation -->
     {% if current_user.is_authenticated %}
-    <nav class="bg-primary shadow-lg">
+    <nav class="bg-primary shadow-lg relative z-50" x-data="{ mobileMenuOpen: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
+                <!-- Logo and Brand -->
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="flex items-center">
@@ -85,73 +136,78 @@
                             <h1 class="text-white text-xl font-bold">BandMate</h1>
                         </div>
                     </div>
-                    <div class="hidden md:block ml-10">
-                        <div class="flex items-baseline space-x-4">
-                            <a href="{{ url_for('main.dashboard') }}" 
-                               class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
-                                Dashboard
-                            </a>
-                            <a href="{{ url_for('main.wishlist') }}" 
-                               class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
-                                Wishlist
-                            </a>
-                            <a href="{{ url_for('main.setlist_generator') }}" 
-                               class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
-                                Setlist Generator
-                            </a>
-                        </div>
+                </div>
+                
+                <!-- Desktop Navigation -->
+                <div class="hidden md:block">
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ url_for('main.dashboard') }}" 
+                           class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
+                            Dashboard
+                        </a>
+                        <a href="{{ url_for('main.wishlist') }}" 
+                           class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
+                            Wishlist
+                        </a>
+                        <a href="{{ url_for('main.setlist_generator') }}" 
+                           class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium">
+                            Setlist Generator
+                        </a>
                     </div>
                 </div>
+                
+                <!-- Right side items -->
                 <div class="flex items-center">
-                    <div class="flex items-center space-x-4">
-                        <!-- Band Switcher -->
-                        {% if current_user.bands|length > 1 %}
-                        <div class="relative" x-data="{ open: false }">
-                            <button @click="open = !open" 
-                                    class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium flex items-center">
-                                <i class="fas fa-users mr-2"></i>
-                                {% if current_band %}
-                                    {{ current_band.name }}
-                                {% else %}
-                                    Select Band
-                                {% endif %}
-                                <i class="fas fa-chevron-down ml-2"></i>
-                            </button>
-                            
-                            <div x-show="open" 
-                                 @click.away="open = false"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="transform opacity-0 scale-95"
-                                 x-transition:enter-end="transform opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                 x-transition:leave-end="transform opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
-                                 {% for band in current_user.bands %}
-                                 <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if current_band and current_band.id == band.id %}bg-primary-light text-white{% endif %}">
-                                    <div class="flex items-center justify-between">
-                                        <span>{{ band.name }}</span>
-                                        {% if current_user.is_leader_of(band.id) %}
-                                            <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
-                                        {% endif %}
-                                    </div>
-                                 </a>
-                                 {% endfor %}
-                                 <div class="border-t border-gray-100 my-1"></div>
-                                 <a href="{{ url_for('main.select_band') }}" 
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    <i class="fas fa-cog mr-2"></i> Manage Bands
-                                 </a>
-                            </div>
-                        </div>
-                        {% elif current_band %}
-                        <span class="text-white text-sm">
+                    <!-- Band Switcher (Desktop) -->
+                    {% if current_user.bands|length > 1 %}
+                    <div class="hidden md:block relative" x-data="{ open: false }">
+                        <button @click="open = !open" 
+                                class="text-white hover:bg-primary-hover px-3 py-2 rounded-md text-sm font-medium flex items-center">
                             <i class="fas fa-users mr-2"></i>
-                            {{ current_band.name }}
-                        </span>
-                        {% endif %}
+                            {% if current_band %}
+                                {{ current_band.name }}
+                            {% else %}
+                                Select Band
+                            {% endif %}
+                            <i class="fas fa-chevron-down ml-2"></i>
+                        </button>
                         
+                        <div x-show="open" 
+                             @click.away="open = false"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
+                             {% for band in current_user.bands %}
+                             <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 {% if current_band and current_band.id == band.id %}bg-primary-light text-white{% endif %}">
+                                <div class="flex items-center justify-between">
+                                    <span>{{ band.name }}</span>
+                                    {% if current_user.is_leader_of(band.id) %}
+                                        <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
+                                    {% endif %}
+                                </div>
+                             </a>
+                             {% endfor %}
+                             <div class="border-t border-gray-100 my-1"></div>
+                             <a href="{{ url_for('main.select_band') }}" 
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-cog mr-2"></i> Manage Bands
+                             </a>
+                        </div>
+                    </div>
+                    {% elif current_band %}
+                    <span class="hidden md:block text-white text-sm">
+                        <i class="fas fa-users mr-2"></i>
+                        {{ current_band.name }}
+                    </span>
+                    {% endif %}
+                    
+                    <!-- User info and logout (Desktop) -->
+                    <div class="hidden md:flex items-center space-x-4">
                         <span class="text-white text-sm">
                             {{ current_user.name }}
                             {% if current_band and current_user.is_leader_of(current_band.id) %}
@@ -163,7 +219,104 @@
                             Logout
                         </a>
                     </div>
+                    
+                    <!-- Mobile menu button -->
+                    <div class="md:hidden">
+                        <button @click="mobileMenuOpen = !mobileMenuOpen" 
+                                class="text-white hover:bg-primary-hover p-2 rounded-md">
+                            <i class="fas fa-bars text-xl" x-show="!mobileMenuOpen"></i>
+                            <i class="fas fa-times text-xl" x-show="mobileMenuOpen"></i>
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div x-show="mobileMenuOpen" 
+             x-transition:enter="mobile-menu-enter"
+             x-transition:enter-start="mobile-menu-enter-from"
+             x-transition:enter-end="mobile-menu-enter-to"
+             x-transition:leave="mobile-menu-leave"
+             x-transition:leave-start="mobile-menu-leave-from"
+             x-transition:leave-end="mobile-menu-leave-to"
+             class="md:hidden bg-primary-dark shadow-lg"
+             @click.away="mobileMenuOpen = false">
+            
+            <!-- Navigation Links -->
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="{{ url_for('main.dashboard') }}" 
+                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                    <i class="fas fa-tachometer-alt mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('main.wishlist') }}" 
+                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                    <i class="fas fa-heart mr-3"></i>
+                    Wishlist
+                </a>
+                <a href="{{ url_for('main.setlist_generator') }}" 
+                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                    <i class="fas fa-list mr-3"></i>
+                    Setlist Generator
+                </a>
+            </div>
+            
+            <!-- Band Management Section -->
+            {% if current_user.bands|length > 1 %}
+            <div class="border-t border-primary-light mx-4 my-2"></div>
+            <div class="px-2 pb-3">
+                <div class="text-primary-light text-xs font-semibold uppercase tracking-wide px-4 py-2">
+                    Bands
+                </div>
+                {% for band in current_user.bands %}
+                <a href="{{ url_for('main.switch_band', band_id=band.id) }}" 
+                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                    <div class="flex items-center justify-between">
+                        <span>
+                            <i class="fas fa-users mr-3"></i>
+                            {{ band.name }}
+                        </span>
+                        {% if current_user.is_leader_of(band.id) %}
+                            <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs">Leader</span>
+                        {% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+                <a href="{{ url_for('main.select_band') }}" 
+                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                    <i class="fas fa-cog mr-3"></i>
+                    Manage Bands
+                </a>
+            </div>
+            {% elif current_band %}
+            <div class="border-t border-primary-light mx-4 my-2"></div>
+            <div class="px-2 pb-3">
+                <div class="text-primary-light text-xs font-semibold uppercase tracking-wide px-4 py-2">
+                    Current Band
+                </div>
+                <div class="mobile-nav-item text-white">
+                    <i class="fas fa-users mr-3"></i>
+                    {{ current_band.name }}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- User Section -->
+            <div class="border-t border-primary-light mx-4 my-2"></div>
+            <div class="px-2 pb-3">
+                <div class="mobile-nav-item text-white">
+                    <i class="fas fa-user mr-3"></i>
+                    {{ current_user.name }}
+                    {% if current_band and current_user.is_leader_of(current_band.id) %}
+                        <span class="bg-complementary text-white px-2 py-1 rounded-full text-xs ml-2">Leader</span>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('main.logout_route') }}" 
+                   class="mobile-nav-item text-white hover:bg-primary-hover block">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    Logout
+                </a>
             </div>
         </div>
     </nav>
@@ -224,15 +377,15 @@
     {% endwith %}
 
     <!-- Main Content -->
-    <main class="{% if current_user.is_authenticated %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8{% endif %}">
+    <main class="flex-1 {% if current_user.is_authenticated %}max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8{% endif %}">
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="bg-neutral-800 text-white mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <footer class="bg-neutral-800 text-white mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="text-center">
-                <p class="text-neutral-300">&copy; 2025 BandMate. Powered By Pappol</p>
+                <p class="text-neutral-300 text-sm sm:text-base">&copy; 2025 BandMate. Powered By Pappol</p>
             </div>
         </div>
     </footer>
@@ -273,6 +426,24 @@
                 });
             }
         }
+        
+        // Close mobile menu when clicking on a link
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuLinks = document.querySelectorAll('.mobile-nav-item');
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // Close mobile menu after a short delay to allow the click to register
+                    setTimeout(() => {
+                        if (window.Alpine) {
+                            const mobileMenu = window.Alpine.$data(document.querySelector('[x-data]'));
+                            if (mobileMenu && mobileMenu.mobileMenuOpen !== undefined) {
+                                mobileMenu.mobileMenuOpen = false;
+                            }
+                        }
+                    }, 100);
+                });
+            });
+        });
     </script>
     
     {% block extra_scripts %}{% endblock %}
