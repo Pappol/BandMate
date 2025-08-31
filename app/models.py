@@ -155,6 +155,9 @@ class Band(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    emoji = db.Column(db.String(10), nullable=True)  # Emoji for band identification
+    color = db.Column(db.String(7), nullable=True)   # Hex color code (e.g., #FF5733)
+    letter = db.Column(db.String(1), nullable=True)  # Single letter identifier
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # New many-to-many relationship with users
@@ -226,6 +229,51 @@ class Band(db.Model):
             db.session.flush()  # Use flush instead of commit to avoid transaction issues
             return config
         return self.setlist_config
+
+    def get_display_identifier(self):
+        """Get the best available identifier for display (emoji, letter, or first letter of name)"""
+        if self.emoji:
+            return self.emoji
+        elif self.letter:
+            return self.letter.upper()
+        else:
+            return self.name[0].upper() if self.name else '?'
+
+    def get_display_color(self):
+        """Get the band's display color or a default color"""
+        if self.color:
+            return self.color
+        else:
+            # Generate a consistent color based on band name
+            import hashlib
+            hash_object = hashlib.md5(self.name.encode())
+            hash_hex = hash_object.hexdigest()
+            return f"#{hash_hex[:6]}"
+
+    def get_style_attributes(self):
+        """Get CSS style attributes for the band"""
+        color = self.get_display_color()
+        return {
+            'background-color': color,
+            'color': self._get_contrasting_text_color(color)
+        }
+
+    def _get_contrasting_text_color(self, hex_color):
+        """Get contrasting text color (black or white) for a given background color"""
+        if not hex_color or not hex_color.startswith('#'):
+            return '#000000'
+        
+        # Remove # and convert to RGB
+        hex_color = hex_color.lstrip('#')
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        
+        # Calculate luminance
+        luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+        
+        # Return black for light backgrounds, white for dark backgrounds
+        return '#000000' if luminance > 0.5 else '#FFFFFF'
 
 
 class Song(db.Model):

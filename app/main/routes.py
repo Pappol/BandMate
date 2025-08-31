@@ -986,6 +986,60 @@ def make_leader(member_id):
     
     return redirect(url_for('main.band_management'))
 
+@main.route('/band/personalize', methods=['GET', 'POST'])
+@login_required
+def personalize_band():
+    """Edit band personalization (emoji, color, letter)"""
+    # Get current band from session
+    current_band_id = session.get('current_band_id')
+    if not current_band_id:
+        flash('No band selected. Please select a band first.', 'warning')
+        return redirect(url_for('main.select_band'))
+    
+    current_band = db.session.get(Band, current_band_id)
+    if not current_band:
+        flash('Band not found.', 'error')
+        return redirect(url_for('main.select_band'))
+    
+    if request.method == 'POST':
+        if not current_user.is_leader_of(current_band_id):
+            flash('Only band leaders can personalize the band.', 'error')
+            return redirect(url_for('main.band_management'))
+        
+        emoji = request.form.get('emoji', '').strip()
+        color = request.form.get('color', '').strip()
+        letter = request.form.get('letter', '').strip()
+        
+        # Validate inputs
+        if emoji and len(emoji) > 10:
+            flash('Emoji is too long.', 'error')
+            return redirect(url_for('main.personalize_band'))
+        
+        if color and not color.startswith('#') and len(color) != 7:
+            flash('Invalid color format. Use hex format (e.g., #FF5733).', 'error')
+            return redirect(url_for('main.personalize_band'))
+        
+        if letter and len(letter) != 1:
+            flash('Letter must be a single character.', 'error')
+            return redirect(url_for('main.personalize_band'))
+        
+        try:
+            # Update band personalization
+            current_band.emoji = emoji if emoji else None
+            current_band.color = color if color else None
+            current_band.letter = letter.upper() if letter else None
+            
+            db.session.commit()
+            flash('Band personalization updated successfully!', 'success')
+            return redirect(url_for('main.band_management'))
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error updating band personalization: {e}")
+            flash('Failed to update band personalization. Please try again.', 'error')
+    
+    return render_template('personalize_band.html', current_band=current_band)
+
 @main.route('/setlist/config')
 @login_required
 @band_leader_required
