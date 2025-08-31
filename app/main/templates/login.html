@@ -3,27 +3,32 @@
 {% block title %}Login - BandMate{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 via-neutral-100 to-neutral-200 py-6 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
-        <div>
-            <div class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-primary-light">
-                <img src="{{ url_for('static', filename='BandMateLogo.png') }}" alt="BandMate Logo" class="h-8 w-8">
+        <!-- Logo and Header Section -->
+        <div class="text-center">
+            <!-- Larger Logo Container -->
+            <div class="mx-auto h-24 w-24 flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-dark shadow-lg mb-6">
+                <img src="{{ url_for('static', filename='BandMateLogo.png') }}" alt="BandMate Logo" class="h-16 w-16 drop-shadow-sm">
             </div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-neutral-900">
-                Welcome to BandMate
-            </h2>
-            <p class="mt-2 text-center text-sm text-neutral-600">
-                Manage your band's song repertoire and generate optimized setlists
+            
+            <!-- Enhanced Typography -->
+            <h1 class="text-3xl sm:text-4xl font-bold text-neutral-900 mb-3">
+                Welcome to <span class="text-primary">BandMate</span>
+            </h1>
+            <p class="text-base sm:text-lg text-neutral-700 leading-relaxed max-w-sm mx-auto">
+                Manage your band's song repertoire and generate optimized setlists with AI-powered recommendations
             </p>
         </div>
         
-        <div class="mt-8 space-y-6">
-            <!-- Google OAuth Button - Only show if configured -->
+        <!-- Main Content Container -->
+        <div class="bg-white rounded-2xl shadow-xl border border-neutral-200 p-6 sm:p-8 space-y-6">
+            <!-- Google OAuth Button -->
             {% if config.GOOGLE_OAUTH_CLIENT_ID and config.GOOGLE_OAUTH_CLIENT_ID != 'your-google-client-id.apps.googleusercontent.com' %}
             <div>
                 <a href="{{ url_for('google.login') }}" 
-                   class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200">
-                    <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                   class="group relative w-full flex justify-center items-center py-3.5 px-6 border border-transparent text-base font-semibold rounded-xl text-neutral-900 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-4 focus:ring-primary/20 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl">
+                    <svg class="w-6 h-6 mr-3" viewBox="0 0 24 24">
                         <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                         <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                         <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -33,17 +38,19 @@
                 </a>
             </div>
             {% else %}
-            <!-- OAuth Not Configured Message -->
-            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                <div class="flex">
+            <!-- Enhanced OAuth Not Configured Message -->
+            <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl p-4">
+                <div class="flex items-start">
                     <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
+                        <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                            <svg class="h-5 w-5 text-amber-700" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
                     </div>
                     <div class="ml-3">
-                        <h3 class="text-sm font-medium text-yellow-800">Google OAuth Not Configured</h3>
-                        <div class="mt-2 text-sm text-yellow-700">
+                        <h3 class="text-sm font-semibold text-amber-900">Google OAuth Not Configured</h3>
+                        <div class="mt-1 text-sm text-amber-800">
                             <p>Google OAuth is not set up yet. Use the demo accounts below to test the application.</p>
                         </div>
                     </div>
@@ -51,55 +58,104 @@
             </div>
             {% endif %}
             
-            <!-- Invitation Code Section -->
-            <div class="bg-complementary-light border border-complementary rounded-md p-4">
-                <h3 class="text-sm font-medium text-complementary-dark mb-2">Have an invitation code?</h3>
-                <form method="GET" action="#" class="flex space-x-2" onsubmit="joinWithCode(event)">
-                    <input type="text" id="invitationCode" name="code" placeholder="Enter invitation code" 
-                           class="flex-1 border border-complementary rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-complementary focus:border-complementary"
-                           pattern="[A-Z0-9]{8}" title="8-character invitation code" required>
-                    <button type="submit" 
-                            class="bg-complementary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-complementary-dark focus:outline-none focus:ring-2 focus:ring-complementary">
-                        Join Band
-                    </button>
+            <!-- Enhanced Invitation Code Section -->
+            <div class="bg-gradient-to-r from-complementary-light/20 to-complementary/20 border border-complementary/30 rounded-xl p-4">
+                <h3 class="text-sm font-semibold text-complementary-dark mb-3 flex items-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                    </svg>
+                    Have an invitation code?
+                </h3>
+                <form method="GET" action="#" class="space-y-3" onsubmit="joinWithCode(event)">
+                    <div class="flex space-x-2">
+                        <input type="text" id="invitationCode" name="code" placeholder="Enter 8-character code" 
+                               class="flex-1 border border-complementary/30 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-complementary/50 focus:border-complementary transition-all duration-200 bg-white/90 backdrop-blur-sm text-neutral-900 placeholder-neutral-500"
+                               pattern="[A-Z0-9]{8}" title="8-character invitation code" required>
+                        <button type="submit" 
+                                class="bg-gradient-to-r from-complementary to-complementary-dark text-white px-6 py-3 rounded-lg text-sm font-semibold hover:from-complementary-dark hover:to-complementary focus:outline-none focus:ring-2 focus:ring-complementary/50 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg">
+                            Join
+                        </button>
+                    </div>
+                    <p class="text-xs text-complementary-dark">Enter the 8-character code from your band leader</p>
                 </form>
-                <p class="text-xs text-complementary-dark mt-2">Enter the 8-character code you received from your band leader</p>
             </div>
 
-            <!-- Demo Login Section -->
-            <div class="grid grid-cols-1 gap-3">
-                <a href="{{ url_for('main.demo_login', email='alice@demo.com') }}" 
-                   class="w-full flex justify-center py-3 px-4 border-2 border-primary rounded-md shadow-lg text-sm font-medium text-primary-dark bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 cursor-pointer relative z-10">
-                    🎯 Demo as Alice (Band Leader)
-                </a>
-                <a href="{{ url_for('main.demo_login', email='bob@demo.com') }}" 
-                   class="w-full flex justify-center py-3 px-4 border-2 border-complementary rounded-md shadow-lg text-sm font-medium text-complementary-dark bg-white hover:bg-complementary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-complementary transition-colors duration-200 cursor-pointer relative z-10">
-                    🎸 Demo as Bob (Member)
-                </a>
-                <a href="{{ url_for('main.demo_login', email='carla@demo.com') }}" 
-                   class="w-full flex justify-center py-3 px-4 border-2 border-primary rounded-md shadow-lg text-sm font-medium text-primary-dark bg-white hover:bg-primary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200 cursor-pointer relative z-10">
-                    🎤 Demo as Carla (Member)
-                </a>
+            <!-- Enhanced Demo Login Section -->
+            <div class="space-y-3">
+                <div class="text-center">
+                    <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-neutral-200 text-neutral-800">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Try Demo Accounts
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-3">
+                    <a href="{{ url_for('main.demo_login', email='alice@demo.com') }}" 
+                       class="group w-full flex items-center justify-center py-3.5 px-6 border-2 border-primary/30 rounded-xl text-sm font-semibold text-primary-dark bg-gradient-to-r from-primary-light/10 to-primary/10 hover:from-primary-light/20 hover:to-primary/20 focus:outline-none focus:ring-4 focus:ring-primary/20 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] cursor-pointer relative z-10 shadow-sm hover:shadow-md">
+                        <span class="text-lg mr-3">🎯</span>
+                        <span class="text-left">
+                            <div class="font-semibold text-primary-dark">Demo as Alice</div>
+                            <div class="text-xs text-primary-dark/80">Band Leader</div>
+                        </span>
+                    </a>
+                    
+                    <a href="{{ url_for('main.demo_login', email='bob@demo.com') }}" 
+                       class="group w-full flex items-center justify-center py-3.5 px-6 border-2 border-complementary/30 rounded-xl text-sm font-semibold text-complementary-dark bg-gradient-to-r from-complementary-light/10 to-complementary/10 hover:from-complementary-light/20 hover:to-complementary/20 focus:outline-none focus:ring-4 focus:ring-complementary/20 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] cursor-pointer relative z-10 shadow-sm hover:shadow-md">
+                        <span class="text-lg mr-3">🎸</span>
+                        <span class="text-left">
+                            <div class="font-semibold text-complementary-dark">Demo as Bob</div>
+                            <div class="text-xs text-complementary-dark/80">Band Member</div>
+                        </span>
+                    </a>
+                    
+                    <a href="{{ url_for('main.demo_login', email='carla@demo.com') }}" 
+                       class="group w-full flex items-center justify-center py-3.5 px-6 border-2 border-primary/30 rounded-xl text-sm font-semibold text-primary-dark bg-gradient-to-r from-primary-light/10 to-primary/10 hover:from-primary-light/20 hover:to-primary/20 focus:outline-none focus:ring-4 focus:ring-primary/20 focus:ring-offset-2 transition-all duration-300 transform hover:scale-[1.02] cursor-pointer relative z-10 shadow-sm hover:shadow-md">
+                        <span class="text-lg mr-3">🎤</span>
+                        <span class="text-left">
+                            <div class="font-semibold text-primary-dark">Demo as Carla</div>
+                            <div class="text-xs text-primary-dark/80">Band Member</div>
+                        </span>
+                    </a>
+                </div>
             </div>
             
-            <div class="text-center">
-                <p class="text-sm text-gray-500">
-                    By signing in, you agree to our terms of service and privacy policy
+            <!-- Enhanced Footer -->
+            <div class="text-center pt-4 border-t border-neutral-200">
+                <p class="text-xs text-neutral-600 leading-relaxed">
+                    By signing in, you agree to our 
+                    <a href="#" class="text-primary hover:text-primary-dark underline decoration-dotted">terms of service</a> 
+                    and 
+                    <a href="#" class="text-primary hover:text-primary-dark underline decoration-dotted">privacy policy</a>
                 </p>
             </div>
-
-            <script>
-            function joinWithCode(event) {
-                event.preventDefault();
-                const code = document.getElementById('invitationCode').value.trim().toUpperCase();
-                if (code && code.length === 8) {
-                    window.location.href = `/band/join/${code}`;
-                } else {
-                    alert('Please enter a valid 8-character invitation code');
-                }
-            }
-            </script>
         </div>
     </div>
 </div>
+
+<script>
+function joinWithCode(event) {
+    event.preventDefault();
+    const code = document.getElementById('invitationCode').value.trim().toUpperCase();
+    if (code && code.length === 8) {
+        window.location.href = `/band/join/${code}`;
+    } else {
+        alert('Please enter a valid 8-character invitation code');
+    }
+}
+
+// Add some interactive animations
+document.addEventListener('DOMContentLoaded', function() {
+    const logo = document.querySelector('.mx-auto.h-24');
+    if (logo) {
+        logo.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05) rotate(2deg)';
+        });
+        logo.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1) rotate(0deg)';
+        });
+    }
+});
+</script>
 {% endblock %}
