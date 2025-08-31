@@ -11,9 +11,10 @@
 ## 🎯 REQUISITI FUNZIONALI
 
 ### Autenticazione e Gestione Utenti
-- [] Login con Google OAuth
+- [x] Login con Google OAuth
+- [x] **Registrazione e login con email e password** ✅
 - [x] Sistema di ruoli (band leader, membro)
-- [] Onboarding per nuovi utenti
+- [x] Onboarding per nuovi utenti
 - [x] Gestione sessioni
 
 ### Gestione Band
@@ -22,6 +23,7 @@
 - [x] **Sistema di inviti esteso per tutti i membri** ✅
 - [x] **Gestione ruoli e permessi** ✅
 - [x] **Possibilità per i membri di lasciare la band** ✅
+- [x] **Sistema di join band corretto** ✅
 
 ### Gestione Canzoni
 - [x] Aggiunta canzoni alla wishlist
@@ -161,6 +163,46 @@ SPOTIFY_CLIENT_SECRET=your-spotify-client-secret
 3. **Dashboard Professionale**: Album art per interfaccia più accattivante
 4. **Dati Precisi**: Informazioni ufficiali Spotify (titolo, artista, album)
 
+## 🔐 SISTEMA DI AUTENTICAZIONE MIGLIORATO
+
+### Funzionalità di Registrazione e Login
+- [x] **Registrazione Manuale** ✅
+  - Creazione account con email e password
+  - Validazione campi e conferma password
+  - Hashing sicuro delle password (SHA-256)
+  - Controllo duplicati email
+
+- [x] **Login con Email e Password** ✅
+  - Autenticazione tradizionale senza Google OAuth
+  - Verifica password hash
+  - Reindirizzamento intelligente dopo login
+  - Gestione errori di autenticazione
+
+- [x] **Integrazione con Sistema Esistente** ✅
+  - Compatibilità con Google OAuth
+  - Flusso onboarding unificato
+  - Gestione sessioni coerente
+  - Interfaccia utente integrata
+
+### Architettura del Sistema
+```
+User Model
+├── password_hash (String) - Hash della password
+├── set_password(password) - Metodo per impostare password
+└── check_password(password) - Metodo per verificare password
+
+Routes
+├── /register (GET/POST) - Registrazione utente
+├── /login/email (GET/POST) - Login con email
+└── Integrazione con onboarding esistente
+```
+
+### Vantaggi delle Nuove Funzionalità
+1. **Accessibilità**: Utenti senza Google possono creare account
+2. **Flessibilità**: Scelta tra OAuth e autenticazione tradizionale
+3. **Sicurezza**: Hashing delle password e validazione robusta
+4. **UX Migliorata**: Flusso di registrazione e login semplificato
+
 ## 👥 GESTIONE BAND AVANZATA
 
 ### Funzionalità di Gestione Membri
@@ -240,6 +282,20 @@ Routes
     - ✅ UI band switcher nella navigazione
     - ✅ Template per selezione, creazione e join band
     - ✅ Test suite completa per tutte le funzionalità
+
+- [x] **RISOLVERE PROBLEMI DI JOIN BAND** ✅ COMPLETATO
+  - Problema: Invitation code section nella login page causava confusione
+  - Problema: Errori nell'onboarding per join band
+  - Obiettivo: Creare un sistema di registrazione e login senza Google OAuth
+  - Implementazione: 
+    - ✅ Rimosso invitation code section dalla login page
+    - ✅ Creato sistema di registrazione con email e password
+    - ✅ Creato sistema di login con email e password
+    - ✅ Aggiunto campo password_hash al modello User
+    - ✅ Corretto flusso di join band nell'onboarding
+    - ✅ **RISOLTO ERRORE DI REDIRECT LOOP** ✅
+  - Status: COMPLETATO - 31 Agosto 2025
+  - Test: Creati test completi per prevenire redirect loop (`tests/test_registration_flow.py`)
 
 - [ ] Implementare gestione errori OAuth robusta
 - [ ] Aggiungere logout OAuth completo

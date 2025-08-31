@@ -105,6 +105,21 @@ def google_authorized():
 @main.route('/onboarding')
 def onboarding():
     """Onboarding page for new users"""
+    # Handle both Google OAuth and manual registration users
+    if current_user.is_authenticated:
+        # User is already logged in (manual registration)
+        # Check if user has any bands
+        if current_user.bands:
+            # User has bands - redirect to band selection
+            return redirect(url_for('main.select_band'))
+        else:
+            # User has no bands - show onboarding
+            return render_template('onboarding.html', user_info={
+                'name': current_user.name,
+                'email': current_user.email
+            })
+    
+    # Handle Google OAuth flow
     if 'google_user_info' not in session:
         flash('Please log in with Google first.', 'warning')
         return redirect(url_for('main.login'))
