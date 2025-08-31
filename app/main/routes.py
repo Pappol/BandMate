@@ -144,7 +144,7 @@ def onboarding():
 
 @main.route('/create_band', methods=['POST'])
 def create_band():
-    """Create a new band and user"""
+    """Create a new band and user for Google OAuth users"""
     if 'google_user_info' not in session:
         flash('Please log in with Google first.', 'warning')
         return redirect(url_for('main.login'))
@@ -171,7 +171,7 @@ def create_band():
         db.session.add(user)
         db.session.flush()  # Get the user ID
         
-        # Add user to band with leader role
+        # Add user to band with leader role using the new system
         band.add_member(user, UserRole.LEADER)
         
         # Set current band in session
@@ -192,7 +192,7 @@ def create_band():
 
 @main.route('/join_band', methods=['POST'])
 def join_band_legacy():
-    """Join an existing band (legacy function)"""
+    """Join an existing band for Google OAuth users"""
     if 'google_user_info' not in session:
         flash('Please log in with Google first.', 'warning')
         return redirect(url_for('main.login'))
@@ -204,24 +204,36 @@ def join_band_legacy():
     
     google_user_info = session['google_user_info']
     
-    # For now, we'll use a simple approach - join the first available band
-    # In a real app, you'd have proper invitation codes
-    band = Band.query.first()
-    if not band:
-        flash('No bands available to join.', 'error')
-        return redirect(url_for('main.onboarding'))
-    
     try:
+        # Find invitation by code
+        invitation = Invitation.query.filter_by(code=invitation_code).first()
+        if not invitation or not invitation.is_valid:
+            flash('Invalid or expired invitation code. Please check and try again.', 'error')
+            return redirect(url_for('main.onboarding'))
+        
+        # Get the band
+        band = db.session.get(Band, invitation.band_id)
+        if not band:
+            flash('Band not found.', 'error')
+            return redirect(url_for('main.onboarding'))
+        
         # Create new user
         user = User(
             id=google_user_info['id'],
             name=google_user_info['name'],
-            email=google_user_info['email'],
-            band_id=band.id,
-            is_band_leader=False
+            email=google_user_info['email']
         )
         db.session.add(user)
-        db.session.commit()
+        db.session.flush()  # Get the user ID
+        
+        # Add user to band using the new system
+        band.add_member(user, UserRole.MEMBER)
+        
+        # Mark invitation as accepted
+        invitation.status = InvitationStatus.ACCEPTED
+        
+        # Set current band in session
+        session['current_band_id'] = band.id
         
         # Log in the user
         login_user(user)
