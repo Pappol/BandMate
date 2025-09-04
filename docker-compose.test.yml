@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  test-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=bandmate_test
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d bandmate_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  test-runner:
+    build: .
+    depends_on:
+      test-db:
+        condition: service_healthy
+    environment:
+      - FLASK_ENV=testing
+      - DATABASE_URL=postgresql://test_user:test_pass@test-db:5432/bandmate_test
+      - FLASK_SECRET_KEY=test-secret-key
+      - GOOGLE_CLIENT_ID=test-client-id
+      - GOOGLE_CLIENT_SECRET=test-client-secret
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python run_database_tests.py all
+
+volumes:
+  test_postgres_data:

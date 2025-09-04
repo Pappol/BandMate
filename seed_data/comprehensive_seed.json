@@ -1,0 +1,521 @@
+{
+  "bands": [
+    {
+      "name": "Thunder Road",
+      "emoji": "⚡",
+      "color": "#FF6B6B",
+      "letter": "T",
+      "allow_member_invites": true,
+      "description": "Classic rock cover band specializing in 70s-80s hits"
+    },
+    {
+      "name": "Neon Dreams",
+      "emoji": "🌃",
+      "color": "#9B59B6",
+      "letter": "N",
+      "allow_member_invites": false,
+      "description": "Electronic rock fusion band with original compositions"
+    },
+    {
+      "name": "Acoustic Souls",
+      "emoji": "🎵",
+      "color": "#2ECC71",
+      "letter": "A",
+      "allow_member_invites": true,
+      "description": "Folk and acoustic music collective"
+    },
+    {
+      "name": "Metal Mayhem",
+      "emoji": "🤘",
+      "color": "#E74C3C",
+      "letter": "M",
+      "allow_member_invites": false,
+      "description": "Heavy metal band with progressive influences"
+    },
+    {
+      "name": "Jazz Collective",
+      "emoji": "🎷",
+      "color": "#F39C12",
+      "letter": "J",
+      "allow_member_invites": true,
+      "description": "Experimental jazz and fusion ensemble"
+    }
+  ],
+  "users": [
+    {
+      "name": "Sarah Mitchell",
+      "email": "sarah.mitchell@email.com",
+      "instrument": "Lead Vocals",
+      "experience_years": 8,
+      "bands": ["Thunder Road", "Neon Dreams"],
+      "roles": {"Thunder Road": "leader", "Neon Dreams": "member"}
+    },
+    {
+      "name": "Marcus Johnson",
+      "email": "marcus.j@email.com",
+      "instrument": "Lead Guitar",
+      "experience_years": 12,
+      "bands": ["Thunder Road", "Metal Mayhem"],
+      "roles": {"Thunder Road": "member", "Metal Mayhem": "leader"}
+    },
+    {
+      "name": "Elena Rodriguez",
+      "email": "elena.rodriguez@email.com",
+      "instrument": "Bass Guitar",
+      "experience_years": 6,
+      "bands": ["Thunder Road", "Acoustic Souls"],
+      "roles": {"Thunder Road": "member", "Acoustic Souls": "leader"}
+    },
+    {
+      "name": "David Chen",
+      "email": "david.chen@email.com",
+      "instrument": "Drums",
+      "experience_years": 10,
+      "bands": ["Thunder Road", "Jazz Collective"],
+      "roles": {"Thunder Road": "member", "Jazz Collective": "member"}
+    },
+    {
+      "name": "Alex Thompson",
+      "email": "alex.thompson@email.com",
+      "instrument": "Keyboard/Synth",
+      "experience_years": 7,
+      "bands": ["Neon Dreams", "Jazz Collective"],
+      "roles": {"Neon Dreams": "leader", "Jazz Collective": "leader"}
+    },
+    {
+      "name": "Maya Patel",
+      "email": "maya.patel@email.com",
+      "instrument": "Rhythm Guitar",
+      "experience_years": 5,
+      "bands": ["Neon Dreams", "Acoustic Souls"],
+      "roles": {"Neon Dreams": "member", "Acoustic Souls": "member"}
+    },
+    {
+      "name": "Jake Wilson",
+      "email": "jake.wilson@email.com",
+      "instrument": "Lead Guitar",
+      "experience_years": 9,
+      "bands": ["Metal Mayhem", "Jazz Collective"],
+      "roles": {"Metal Mayhem": "member", "Jazz Collective": "member"}
+    },
+    {
+      "name": "Luna Martinez",
+      "email": "luna.martinez@email.com",
+      "instrument": "Vocals",
+      "experience_years": 4,
+      "bands": ["Acoustic Souls", "Jazz Collective"],
+      "roles": {"Acoustic Souls": "member", "Jazz Collective": "member"}
+    },
+    {
+      "name": "Ryan O'Connor",
+      "email": "ryan.oconnor@email.com",
+      "instrument": "Bass Guitar",
+      "experience_years": 11,
+      "bands": ["Metal Mayhem"],
+      "roles": {"Metal Mayhem": "member"}
+    },
+    {
+      "name": "Zoe Kim",
+      "email": "zoe.kim@email.com",
+      "instrument": "Drums",
+      "experience_years": 6,
+      "bands": ["Neon Dreams", "Metal Mayhem"],
+      "roles": {"Neon Dreams": "member", "Metal Mayhem": "member"}
+    }
+  ],
+  "songs": {
+    "Thunder Road": [
+      {
+        "title": "Bohemian Rhapsody",
+        "artist": "Queen",
+        "status": "active",
+        "duration_seconds": 355,
+        "last_rehearsed_on": "2024-01-15",
+        "spotify_track_id": "4uG8q3yuxVp6iFpZRj8Kt1",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Rock",
+        "difficulty": "Advanced",
+        "key": "Bb minor",
+        "tempo": 72
+      },
+      {
+        "title": "Hotel California",
+        "artist": "Eagles",
+        "status": "active",
+        "duration_seconds": 391,
+        "last_rehearsed_on": "2024-01-10",
+        "spotify_track_id": "40riOy7x9W7G1lU8NcJpiV",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Rock",
+        "difficulty": "Intermediate",
+        "key": "B minor",
+        "tempo": 75
+      },
+      {
+        "title": "Sweet Child O' Mine",
+        "artist": "Guns N' Roses",
+        "status": "active",
+        "duration_seconds": 356,
+        "last_rehearsed_on": "2024-01-20",
+        "spotify_track_id": "7snQQk1zcKl8gZ92AnueZW",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Rock",
+        "difficulty": "Intermediate",
+        "key": "D major",
+        "tempo": 125
+      },
+      {
+        "title": "Don't Stop Believin'",
+        "artist": "Journey",
+        "status": "active",
+        "duration_seconds": 251,
+        "last_rehearsed_on": "2024-01-25",
+        "spotify_track_id": "4bHsxqR3GMrXTxEPLuK5ue",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Rock",
+        "difficulty": "Beginner",
+        "key": "E major",
+        "tempo": 121
+      },
+      {
+        "title": "Livin' on a Prayer",
+        "artist": "Bon Jovi",
+        "status": "wishlist",
+        "duration_seconds": 249,
+        "spotify_track_id": "0J2mOQYwVgWjkMyGqqGSxX",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Rock",
+        "difficulty": "Intermediate",
+        "key": "C# minor",
+        "tempo": 122
+      },
+      {
+        "title": "Eye of the Tiger",
+        "artist": "Survivor",
+        "status": "wishlist",
+        "duration_seconds": 245,
+        "spotify_track_id": "2HHtGyy1jJUH6P0OOm5KMV",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Rock",
+        "difficulty": "Beginner",
+        "key": "C major",
+        "tempo": 109
+      }
+    ],
+    "Neon Dreams": [
+      {
+        "title": "Digital Dreams",
+        "artist": "Neon Dreams",
+        "status": "active",
+        "duration_seconds": 245,
+        "last_rehearsed_on": "2024-01-18",
+        "spotify_track_id": null,
+        "album_art_url": null,
+        "genre": "Electronic Rock",
+        "difficulty": "Advanced",
+        "key": "A minor",
+        "tempo": 128
+      },
+      {
+        "title": "Synthetic Love",
+        "artist": "Neon Dreams",
+        "status": "active",
+        "duration_seconds": 198,
+        "last_rehearsed_on": "2024-01-12",
+        "spotify_track_id": null,
+        "album_art_url": null,
+        "genre": "Electronic Rock",
+        "difficulty": "Intermediate",
+        "key": "F# minor",
+        "tempo": 140
+      },
+      {
+        "title": "Electric Storm",
+        "artist": "Neon Dreams",
+        "status": "active",
+        "duration_seconds": 312,
+        "last_rehearsed_on": "2024-01-08",
+        "spotify_track_id": null,
+        "album_art_url": null,
+        "genre": "Electronic Rock",
+        "difficulty": "Advanced",
+        "key": "E minor",
+        "tempo": 135
+      },
+      {
+        "title": "Midnight City",
+        "artist": "M83",
+        "status": "wishlist",
+        "duration_seconds": 244,
+        "spotify_track_id": "0FQJ4GdHTJJ23YDJnDJSRQ",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Electronic",
+        "difficulty": "Intermediate",
+        "key": "C major",
+        "tempo": 100
+      },
+      {
+        "title": "Clarity",
+        "artist": "Zedd",
+        "status": "wishlist",
+        "duration_seconds": 251,
+        "spotify_track_id": "0c7vFIYNlNCkudrnSVpnNI",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Electronic",
+        "difficulty": "Advanced",
+        "key": "A major",
+        "tempo": 128
+      }
+    ],
+    "Acoustic Souls": [
+      {
+        "title": "Hallelujah",
+        "artist": "Leonard Cohen",
+        "status": "active",
+        "duration_seconds": 272,
+        "last_rehearsed_on": "2024-01-14",
+        "spotify_track_id": "3pRaLNL3b8x5uBOcsgvdqM",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Folk",
+        "difficulty": "Intermediate",
+        "key": "C major",
+        "tempo": 72
+      },
+      {
+        "title": "The Sound of Silence",
+        "artist": "Simon & Garfunkel",
+        "status": "active",
+        "duration_seconds": 199,
+        "last_rehearsed_on": "2024-01-19",
+        "spotify_track_id": "1jYF3U6Up0KMiOZSq2D0fI",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Folk",
+        "difficulty": "Beginner",
+        "key": "D minor",
+        "tempo": 69
+      },
+      {
+        "title": "Fast Car",
+        "artist": "Tracy Chapman",
+        "status": "active",
+        "duration_seconds": 294,
+        "last_rehearsed_on": "2024-01-16",
+        "spotify_track_id": "2M9ro2krNb7nr7HSprkEgo",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Folk",
+        "difficulty": "Intermediate",
+        "key": "C major",
+        "tempo": 101
+      },
+      {
+        "title": "Black",
+        "artist": "Pearl Jam",
+        "status": "wishlist",
+        "duration_seconds": 343,
+        "spotify_track_id": "5Xak5fmy0tQPmJ4rMoiW4K",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Alternative",
+        "difficulty": "Advanced",
+        "key": "F# minor",
+        "tempo": 76
+      }
+    ],
+    "Metal Mayhem": [
+      {
+        "title": "Master of Puppets",
+        "artist": "Metallica",
+        "status": "active",
+        "duration_seconds": 515,
+        "last_rehearsed_on": "2024-01-13",
+        "spotify_track_id": "2MuWTIM3b0YEAskXFE6k8r",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Metal",
+        "difficulty": "Advanced",
+        "key": "E minor",
+        "tempo": 212
+      },
+      {
+        "title": "Enter Sandman",
+        "artist": "Metallica",
+        "status": "active",
+        "duration_seconds": 331,
+        "last_rehearsed_on": "2024-01-17",
+        "spotify_track_id": "5sICkBXVmaCQk5cISjf9ln",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Metal",
+        "difficulty": "Intermediate",
+        "key": "E minor",
+        "tempo": 123
+      },
+      {
+        "title": "Iron Man",
+        "artist": "Black Sabbath",
+        "status": "active",
+        "duration_seconds": 325,
+        "last_rehearsed_on": "2024-01-11",
+        "spotify_track_id": "6EDVYc6t4a0PuyhWXcU25o",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Metal",
+        "difficulty": "Intermediate",
+        "key": "E minor",
+        "tempo": 108
+      },
+      {
+        "title": "Paranoid",
+        "artist": "Black Sabbath",
+        "status": "wishlist",
+        "duration_seconds": 168,
+        "spotify_track_id": "1jzDzZWeRDB3u7pIqXDN6d",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Metal",
+        "difficulty": "Beginner",
+        "key": "E minor",
+        "tempo": 140
+      }
+    ],
+    "Jazz Collective": [
+      {
+        "title": "Take Five",
+        "artist": "Dave Brubeck",
+        "status": "active",
+        "duration_seconds": 324,
+        "last_rehearsed_on": "2024-01-09",
+        "spotify_track_id": "1hA5gu9yQm0gBFUir3ip7N",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Jazz",
+        "difficulty": "Advanced",
+        "key": "E♭ minor",
+        "tempo": 176
+      },
+      {
+        "title": "Blue in Green",
+        "artist": "Miles Davis",
+        "status": "active",
+        "duration_seconds": 337,
+        "last_rehearsed_on": "2024-01-21",
+        "spotify_track_id": "0BMM3V3ELqk3ynl0ow0wwS",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Jazz",
+        "difficulty": "Advanced",
+        "key": "E♭ major",
+        "tempo": 120
+      },
+      {
+        "title": "So What",
+        "artist": "Miles Davis",
+        "status": "wishlist",
+        "duration_seconds": 320,
+        "spotify_track_id": "4vWn9k1y7i1xqYGx3vEwDl",
+        "album_art_url": "https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a",
+        "genre": "Jazz",
+        "difficulty": "Advanced",
+        "key": "D minor",
+        "tempo": 132
+      }
+    ]
+  },
+  "progress_patterns": {
+    "Thunder Road": {
+      "sarah": "advanced",
+      "marcus": "advanced", 
+      "elena": "intermediate",
+      "david": "intermediate"
+    },
+    "Neon Dreams": {
+      "sarah": "intermediate",
+      "alex": "advanced",
+      "maya": "intermediate",
+      "zoe": "intermediate"
+    },
+    "Acoustic Souls": {
+      "elena": "advanced",
+      "maya": "intermediate",
+      "luna": "beginner"
+    },
+    "Metal Mayhem": {
+      "marcus": "advanced",
+      "jake": "advanced",
+      "ryan": "intermediate",
+      "zoe": "intermediate"
+    },
+    "Jazz Collective": {
+      "david": "intermediate",
+      "alex": "advanced",
+      "jake": "intermediate",
+      "luna": "beginner"
+    }
+  },
+  "setlist_configs": {
+    "Thunder Road": {
+      "new_songs_buffer_percent": 25.0,
+      "learned_songs_buffer_percent": 15.0,
+      "break_time_minutes": 15,
+      "break_threshold_minutes": 90,
+      "min_session_minutes": 45,
+      "max_session_minutes": 180,
+      "time_cluster_minutes": 15
+    },
+    "Neon Dreams": {
+      "new_songs_buffer_percent": 30.0,
+      "learned_songs_buffer_percent": 10.0,
+      "break_time_minutes": 10,
+      "break_threshold_minutes": 75,
+      "min_session_minutes": 30,
+      "max_session_minutes": 120,
+      "time_cluster_minutes": 15
+    },
+    "Acoustic Souls": {
+      "new_songs_buffer_percent": 20.0,
+      "learned_songs_buffer_percent": 5.0,
+      "break_time_minutes": 5,
+      "break_threshold_minutes": 60,
+      "min_session_minutes": 20,
+      "max_session_minutes": 90,
+      "time_cluster_minutes": 10
+    },
+    "Metal Mayhem": {
+      "new_songs_buffer_percent": 35.0,
+      "learned_songs_buffer_percent": 20.0,
+      "break_time_minutes": 20,
+      "break_threshold_minutes": 60,
+      "min_session_minutes": 30,
+      "max_session_minutes": 120,
+      "time_cluster_minutes": 15
+    },
+    "Jazz Collective": {
+      "new_songs_buffer_percent": 40.0,
+      "learned_songs_buffer_percent": 15.0,
+      "break_time_minutes": 10,
+      "break_threshold_minutes": 45,
+      "min_session_minutes": 30,
+      "max_session_minutes": 150,
+      "time_cluster_minutes": 15
+    }
+  },
+  "invitations": [
+    {
+      "band": "Thunder Road",
+      "invited_by": "sarah.mitchell@email.com",
+      "invited_email": "new.member@email.com",
+      "status": "pending",
+      "expires_in_days": 7
+    },
+    {
+      "band": "Acoustic Souls",
+      "invited_by": "elena.rodriguez@email.com",
+      "invited_email": "folk.singer@email.com",
+      "status": "pending",
+      "expires_in_days": 14
+    }
+  ],
+  "notes": {
+    "description": "Comprehensive seed data for BandMate production database",
+    "bands": "5 diverse bands with different musical styles and configurations",
+    "users": "10 users with varying experience levels and multi-band memberships",
+    "songs": "25+ songs across different genres with realistic metadata",
+    "progress": "Realistic progress patterns showing different skill levels",
+    "setlist_configs": "Band-specific setlist generation settings",
+    "invitations": "Sample pending invitations for testing invite system",
+    "realistic_data": "All data designed to showcase real-world usage patterns"
+  }
+}

@@ -14,6 +14,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_dance.contrib.google import make_google_blueprint
+from config import config
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -27,15 +28,12 @@ def create_app(config_name=None):
                 template_folder='main/templates',
                 static_folder='main/static')
 
-    # Configuration
-    app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL',
-                                                      'sqlite:///instance/bandmate.db')
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-    # Google OAuth configuration
-    app.config['GOOGLE_OAUTH_CLIENT_ID'] = os.getenv('GOOGLE_CLIENT_ID')
-    app.config['GOOGLE_OAUTH_CLIENT_SECRET'] = os.getenv('GOOGLE_CLIENT_SECRET')
+    # Determine configuration
+    if config_name is None:
+        config_name = os.getenv('FLASK_ENV', 'default')
+    
+    # Load configuration
+    app.config.from_object(config[config_name])
 
     # Initialize extensions
     db.init_app(app)

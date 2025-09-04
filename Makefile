@@ -17,6 +17,24 @@ test: ## Run tests
 test-watch: ## Run tests in watch mode
 	pytest tests/ -v --cov=app --cov-report=term-missing -f
 
+test-db: ## Run database integration tests
+	python run_database_tests.py all
+
+test-db-integration: ## Run database integration tests only
+	python run_database_tests.py integration
+
+test-db-performance: ## Run database performance tests only
+	python run_database_tests.py performance
+
+test-db-relationships: ## Run database relationship tests only
+	python run_database_tests.py relationships
+
+test-db-quick: ## Run quick database tests
+	python run_database_tests.py quick
+
+test-db-docker: ## Run database tests in Docker
+	docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit
+
 lint: ## Run linting checks
 	black --check --diff .
 	isort --check-only --diff .

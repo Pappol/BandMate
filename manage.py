@@ -7,9 +7,11 @@ Handles database operations, seeding, and other management tasks
 import os
 import sys
 from datetime import datetime, date, timedelta
+from pathlib import Path
 from app import create_app, db
 from app.models import User, Band, Song, SongProgress, Vote, SongStatus, ProgressStatus, UserRole
 from sqlalchemy import text
+from seed_loader import SeedDataLoader
 
 def create_tables():
     """Create all database tables"""
@@ -17,6 +19,7 @@ def create_tables():
     with app.app_context():
         db.create_all()
         print("✅ Database tables created successfully")
+        print(f"   Database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
 def seed_database():
     """Seed the database with demo data"""
@@ -239,15 +242,31 @@ def show_status():
         except Exception as e:
             print(f"❌ Error checking status: {e}")
 
+def seed_comprehensive():
+    """Seed database with comprehensive production data"""
+    app = create_app()
+    loader = SeedDataLoader(app)
+    
+    # Path to comprehensive seed data
+    seed_file = Path(__file__).parent / 'seed_data' / 'comprehensive_seed.json'
+    
+    if not seed_file.exists():
+        print(f"❌ Comprehensive seed file not found: {seed_file}")
+        return
+    
+    loader.load_comprehensive_data(seed_file)
+
 def main():
     """Main CLI interface"""
     if len(sys.argv) < 2:
         print("BandMate Management Script")
         print("\nUsage:")
-        print("  python manage.py create-tables  - Create database tables")
-        print("  python manage.py seed           - Seed database with demo data")
-        print("  python manage.py reset          - Reset database (drop all tables)")
-        print("  python manage.py status         - Show database status")
+        print("  python manage.py create-tables     - Create database tables")
+        print("  python manage.py seed              - Seed database with demo data")
+        print("  python manage.py seed-comprehensive - Seed database with comprehensive production data")
+        print("  python manage.py reset             - Reset database (drop all tables)")
+        print("  python manage.py status            - Show database status")
+        print("  python manage.py init-db           - Initialize database with comprehensive data")
         return
     
     command = sys.argv[1]
@@ -256,13 +275,19 @@ def main():
         create_tables()
     elif command == "seed":
         seed_database()
+    elif command == "seed-comprehensive":
+        seed_comprehensive()
     elif command == "reset":
         reset_database()
     elif command == "status":
         show_status()
+    elif command == "init-db":
+        print("🚀 Initializing database with comprehensive data...")
+        create_tables()
+        seed_comprehensive()
     else:
         print(f"❌ Unknown command: {command}")
-        print("Use: create-tables, seed, reset, or status")
+        print("Use: create-tables, seed, seed-comprehensive, reset, status, or init-db")
 
 if __name__ == "__main__":
     main()
